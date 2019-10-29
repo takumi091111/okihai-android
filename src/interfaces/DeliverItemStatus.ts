@@ -1,0 +1,5 @@
+export enum DELIVER_ITEM_STATUS {
+  UNDELIVERED = 0,
+  UNRECIEVED = 1,
+  NONE = 2
+}
