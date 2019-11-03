@@ -1,5 +1,6 @@
 import React from 'react'
 import { ThemeProvider } from 'react-native-elements'
+import { useBackButton } from '@/utils/hooks'
 import AppContainer from '@/navigator'
 
 const theme = {
@@ -21,8 +22,12 @@ const theme = {
   }
 }
 
-export default () => (
-  <ThemeProvider theme={theme}>
-    <AppContainer />
-  </ThemeProvider>
-)
+export default () => {
+  useBackButton(() => () => null)
+
+  return (
+    <ThemeProvider theme={theme}>
+      <AppContainer />
+    </ThemeProvider>
+  )
+}

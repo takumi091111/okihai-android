@@ -1,23 +1,10 @@
-import React, { useEffect } from 'react'
-import { StyleSheet, BackHandler } from 'react-native'
+import React from 'react'
+import { StyleSheet } from 'react-native'
 import { Input, Button } from 'react-native-elements'
 import { NavigationContainerProps, withNavigation } from 'react-navigation'
 import * as yup from 'yup'
-import { Formik } from 'formik'
+import { useFormik } from 'formik'
 import Container from '@/components/Container'
-
-const useBackButton = (handler: () => void) => {
-  useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', handler)
-
-    return () => {
-      BackHandler.removeEventListener(
-        'hardwareBackPress',
-        handler
-      )
-    }
-  }, [])
-}
 
 const styles = StyleSheet.create({
   inputContainer: {
@@ -40,17 +27,13 @@ const styles = StyleSheet.create({
 })
 
 interface FormValues {
-  email?: string
-  password?: string
-}
-
-const initialValues: FormValues = {
-  email: '',
-  password: ''
+  email: string
+  password: string
 }
 
 const login = async (values: FormValues) => {
-  console.log('処理中', values)
+  console.log('ログイン中...')
+  console.log(values)
   return new Promise((resolve) => {
     setTimeout(() => {
       console.log('完了')
@@ -60,76 +43,69 @@ const login = async (values: FormValues) => {
 }
 
 const Login = ({ navigation }: NavigationContainerProps) => {
-  useBackButton(() => {
-    console.log('back button pressed')
-    return () => null
+  const {
+    values,
+    errors,
+    isSubmitting,
+    handleBlur,
+    handleChange,
+    submitForm
+  } = useFormik({
+    initialValues: {
+      email: '',
+      password: ''
+    },
+    validationSchema: yup.object().shape({
+      email: yup.string()
+        .email('有効なメールアドレスを入力してください')
+        .required('有効なメールアドレスを入力してください'),
+      password: yup.string()
+        .required('有効なパスワードを入力してください')
+    }),
+    onSubmit: async (values) => {
+      await login(values)
+      navigation.navigate('Home')
+    }
   })
-
-  const validationSchema = yup.object().shape({
-    email: yup.string()
-      .email('有効なメールアドレスを入力してください')
-      .required('有効なメールアドレスを入力してください'),
-    password: yup.string()
-      .required('有効なパスワードを入力してください')
-  })
-
-  const handleSubmit = async (values: FormValues) => {
-    await login(values)
-    navigation.navigate('Home')
-  }
 
   return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={validationSchema}
-      onSubmit={handleSubmit}
-    >
-      {({
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        values,
-        errors,
-        isSubmitting
-      }) => (
-        <Container isCenter>
-          <Input
-            placeholder='メールアドレス'
-            leftIcon={{
-              type: 'feather',
-              name: 'mail'
-            }}
-            value={values.email}
-            errorMessage={errors.email}
-            onChangeText={handleChange('email')}
-            onBlur={handleBlur('email')}
-            containerStyle={styles.inputContainer}
-            inputStyle={styles.input}
-          />
-          <Input
-            placeholder='パスワード'
-            leftIcon={{
-              type: 'feather',
-              name: 'lock'
-            }}
-            value={values.password}
-            errorMessage={errors.password}
-            onChangeText={handleChange('password')}
-            onBlur={handleBlur('password')}
-            containerStyle={styles.inputContainer}
-            inputStyle={styles.input}
-          />
-          <Button
-            title='ログイン'
-            loading={isSubmitting}
-            containerStyle={styles.buttonContainer}
-            buttonStyle={styles.button}
-            titleStyle={styles.buttonTitle}
-            onPress={handleSubmit as any}
-          />
-        </Container>
-      )}
-    </Formik>
+    <Container isCenter>
+      <Input
+        placeholder='メールアドレス'
+        leftIcon={{
+          type: 'feather',
+          name: 'mail'
+        }}
+        value={values.email}
+        errorMessage={errors.email}
+        onChangeText={handleChange('email') as any}
+        onBlur={handleBlur('email') as any}
+        containerStyle={styles.inputContainer}
+        inputStyle={styles.input}
+      />
+      <Input
+        secureTextEntry={true}
+        placeholder='パスワード'
+        leftIcon={{
+          type: 'feather',
+          name: 'lock'
+        }}
+        value={values.password}
+        errorMessage={errors.password}
+        onChangeText={handleChange('password') as any}
+        onBlur={handleBlur('password') as any}
+        containerStyle={styles.inputContainer}
+        inputStyle={styles.input}
+      />
+      <Button
+        title='ログイン'
+        loading={isSubmitting}
+        containerStyle={styles.buttonContainer}
+        buttonStyle={styles.button}
+        titleStyle={styles.buttonTitle}
+        onPress={submitForm}
+      />
+    </Container>
   )
 }
 
