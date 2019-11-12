@@ -9,7 +9,7 @@ interface Props {
 export default ({ text = '置き配', onMenuButtonPress }: Props) => (
   <Header
     leftComponent={{
-      type: 'feater',
+      type: 'feather',
       icon: 'menu',
       onPress: onMenuButtonPress
     }}
