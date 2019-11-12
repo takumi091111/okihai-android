@@ -9,7 +9,7 @@ interface Props {
 const containerStyle = (isCenter: boolean) => StyleSheet.flatten({
   flex: 1,
   justifyContent: isCenter ? 'center' : 'flex-start',
-  alignItems: isCenter ? 'center': 'flex-start'
+  alignItems: isCenter ? 'center': 'stretch'
 })
 
 export default ({ children, isCenter = false }: Props) => (
