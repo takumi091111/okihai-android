@@ -5,7 +5,11 @@ export const login = async (email: string, password: string) => {
     email,
     password
   })
-  const body = JSON.stringify({ email, password })
+
+  const body = new FormData()
+  body.append('email', email)
+  body.append('password', password)
+
   const response = await fetch(`${API_URL}/login`, {
     method: 'POST',
     body
