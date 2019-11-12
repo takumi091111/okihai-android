@@ -5,6 +5,7 @@ import { NavigationContainerProps, withNavigation } from 'react-navigation'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import Container from '@/components/Container'
+import { login } from '@/utils/api'
 
 const styles = StyleSheet.create({
   inputContainer: {
@@ -26,22 +27,6 @@ const styles = StyleSheet.create({
   }
 })
 
-interface FormValues {
-  email: string
-  password: string
-}
-
-const login = async (values: FormValues) => {
-  console.log('ログイン中...')
-  console.log(values)
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log('完了')
-      resolve(true)
-    }, 1000)
-  })
-}
-
 const Login = ({ navigation }: NavigationContainerProps) => {
   const {
     values,
@@ -62,8 +47,9 @@ const Login = ({ navigation }: NavigationContainerProps) => {
       password: yup.string()
         .required('有効なパスワードを入力してください')
     }),
-    onSubmit: async (values) => {
-      await login(values)
+    onSubmit: async ({ email, password }) => {
+      const json = await login(email, password)
+      console.log(json)
       navigation.navigate('Home')
     }
   })
