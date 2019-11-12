@@ -1,33 +1,54 @@
-import React, { useState } from 'react'
-import { Button } from 'react-native-elements'
+import React, { useState, useEffect } from 'react'
+import { TouchableWithoutFeedback, StyleSheet } from 'react-native'
+import { AnimatedCircularProgress } from 'react-native-circular-progress'
 import Icon from 'react-native-vector-icons/Feather'
 import { NavigationContainerProps, withNavigation } from 'react-navigation'
 import Container from '@/components/Container'
 import Header from '@/components/Header'
+import { toggleLock } from '@/utils/api'
 
-interface ZipAddress {
-  code: string
-  data: {
-    pref: string
-    city: string
-    town: string
-    address: string
-    fullAddress: string
-  }
-}
-
-const fetchData = async (zipcode: string): Promise<ZipAddress> => {
-  const result = await fetch(`https://api.zipaddress.net/?zipcode=${zipcode}`)
-  return result.json()
-}
+const iconStyle = StyleSheet.flatten({
+  top: -150
+})
 
 const Lock = ({ navigation }: NavigationContainerProps) => {
   const [isLocked, setIsLocked] = useState(true)
   const [lockButtonText, setLockButtonText] = useState('Unlock')
+  const [progress, setProgress] = useState(0)
+  const [isPressIn, setIsPressIn] = useState(false)
+  const [isToggled, setIsToggled] = useState(false)
 
-  const handlePress = () => {
-    setLockButtonText(isLocked ? 'Lock' : 'Unlock')
-    setIsLocked(!isLocked)
+  useEffect(() => {
+    setTimeout(async () => {
+      if (!isPressIn) {
+        setProgress(0)
+        return
+      }
+
+      if (isToggled) {
+        setProgress(0)
+        return
+      }
+
+      if (progress === 100) {
+        setProgress(0)
+        setIsToggled(true)
+        
+        const response = await toggleLock()
+        setIsLocked(response.is_locked)
+      } else {
+        setProgress(progress + 1)
+      }
+    }, 0)
+  })
+
+  const handlePressIn = () => {
+    setIsPressIn(true)
+  }
+
+  const handlePressOut = () => {
+    setIsPressIn(false)
+    setIsToggled(false)
   }
 
   return (
@@ -37,12 +58,26 @@ const Lock = ({ navigation }: NavigationContainerProps) => {
         onMenuButtonPress={() => navigation.toggleDrawer()}
       />
       <Container isCenter={true}>
+        <AnimatedCircularProgress
+          size={200}
+          width={5}
+          fill={progress}
+          tintColor='#000'
+          duration={0}
+          lineCap='round'
+        />
         {
-          isLocked ?
-          <Icon name='lock' size={100} /> :
-          <Icon name='unlock' size={100} />
+          <TouchableWithoutFeedback
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+          >
+            <Icon
+              name={isLocked ? 'lock' : 'unlock'}
+              size={100}
+              style={iconStyle}
+            />
+          </TouchableWithoutFeedback>
         }
-        <Button title={lockButtonText} onPress={handlePress} />
       </Container>
     </>
   )
