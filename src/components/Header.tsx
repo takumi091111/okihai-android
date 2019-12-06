@@ -3,14 +3,15 @@ import { Header } from 'react-native-elements'
 
 interface Props {
   text?: string
+  isStack?: boolean
   onMenuButtonPress?: () => void
 }
 
-export default ({ text = '置き配', onMenuButtonPress }: Props) => (
+export default ({ text = '置き配', isStack = false, onMenuButtonPress }: Props) => (
   <Header
     leftComponent={{
       type: 'feather',
-      icon: 'menu',
+      icon: isStack ? 'arrow-left' : 'menu',
       onPress: onMenuButtonPress
     }}
     centerComponent={{ text }}

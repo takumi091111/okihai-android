@@ -1,6 +1,6 @@
 import React from 'react'
 import { ListItem } from 'react-native-elements'
-import { NavigationContainerProps, withNavigation } from 'react-navigation'
+import { useNavigation } from 'react-navigation-hooks'
 import Container from '@/components/Container'
 import Header from '@/components/Header'
 
@@ -38,12 +38,14 @@ const statusIcon = {
   [DELIVER_ITEM_STATUS.NONE]: 'check'
 }
 
-const Home = ({ navigation }: NavigationContainerProps) => {
+const Home = () => {
+  const { state, toggleDrawer, navigate } = useNavigation()
+
   return (
     <>
       <Header
-        text={navigation.state.params.title}
-        onMenuButtonPress={() => navigation.toggleDrawer()}
+        text={state.params.title}
+        onMenuButtonPress={() => toggleDrawer()}
       />
       <Container>
         { items.map((item, i) => (
@@ -55,7 +57,11 @@ const Home = ({ navigation }: NavigationContainerProps) => {
             title={statusText[item.status]}
             subtitle={DateTimeFormat('ja-JP').format(new Date)}
             bottomDivider={true}
-            onPress={() => navigation.navigate('Lock')}
+            onPress={() => {
+              if (item.status === DELIVER_ITEM_STATUS.UNDELIVERED) return
+              if (item.status === DELIVER_ITEM_STATUS.NONE) return
+              navigate('Lock')
+            }}
           />
         )) }
       </Container>
@@ -63,4 +69,4 @@ const Home = ({ navigation }: NavigationContainerProps) => {
   )
 }
 
-export default withNavigation(Home)
+export default Home

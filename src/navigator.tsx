@@ -1,13 +1,62 @@
-import { createAppContainer } from 'react-navigation'
+import React from 'react'
+import { Easing, Animated } from 'react-native'
+import { createAppContainer, createSwitchNavigator } from 'react-navigation'
+import { createStackNavigator } from 'react-navigation-stack'
 import { createDrawerNavigator } from 'react-navigation-drawer'
+import { Transition } from 'react-native-reanimated'
+import createAnimatedSwitchNavigator from 'react-navigation-animated-switch'
 
-import HomeScreen from '@/screens/Home'
-import LoginScreen from '@/screens/Login'
-import LockScreen from '@/screens/Lock'
+import Splash from '@/screens/Splash'
+import LoginOrRegister from '@/screens/LoginOrRegister'
+import Login from '@/screens/Login'
+import Logout from '@/screens/Logout'
+import Register from '@/screens/Register'
+import Home from '@/screens/Home'
+import Lock from '@/screens/Lock'
 
-const drawerNavigator = createDrawerNavigator({
+const transition = (
+  <Transition.Together>
+    <Transition.In
+      type='fade'
+      durationMs={200}
+    />
+    <Transition.Out
+      type='fade'
+      durationMs={200}
+      interpolation='easeIn'
+    />
+  </Transition.Together>
+)
+
+const transitionConfig = () => {
+  return {
+    transitionSpec: {
+      duration: 750,
+      easing: Easing.out(Easing.poly(4)),
+      timing: Animated.timing,
+      useNativeDriver: true
+    },
+    screenInterpolator: sceneProps => {      
+      const { layout, position, scene } = sceneProps
+
+      const thisSceneIndex = scene.index
+      const width = layout.initWidth
+
+      const translateX = position.interpolate({
+        inputRange: [thisSceneIndex - 1, thisSceneIndex],
+        outputRange: [width, 0]
+      })
+
+      return {
+        transform: [{ translateX }]
+      }
+    },
+  }
+}
+
+const DrawerNavigator = createDrawerNavigator({
   Home: {
-    screen: HomeScreen,
+    screen: Home,
     params: {
       title: 'ホーム'
     },
@@ -15,19 +64,25 @@ const drawerNavigator = createDrawerNavigator({
       title: 'ホーム'
     }
   },
-  Login: {
-    screen: LoginScreen,
+  Logout: {
+    screen: Logout,
     params: {
-      title: 'ログイン'
+      title: 'ログアウト'
     },
     navigationOptions: {
-      title: 'ログイン',
-      drawerLabel: () => null,
-      drawerLockMode: 'locked-closed'
+      title: 'ログアウト'
     }
+  }
+}, {
+  initialRouteName: 'Home'
+})
+
+const StackNavigator = createStackNavigator({
+  Main: {
+    screen: DrawerNavigator
   },
   Lock: {
-    screen: LockScreen,
+    screen: Lock,
     params: {
       title: 'ロック'
     },
@@ -36,7 +91,70 @@ const drawerNavigator = createDrawerNavigator({
     }
   }
 }, {
-  initialRouteName: 'Login'
+  initialRouteName: 'Main',
+  headerMode: 'none',
+  transitionConfig
 })
 
-export default createAppContainer(drawerNavigator)
+const LoginOrRegisterStackNavigator = createStackNavigator({
+  Select: {
+    screen: LoginOrRegister,
+    params: {
+      title: 'ログインまたは新規登録'
+    },
+    navigationOptions: {
+      title: 'ログインまたは新規登録'
+    }
+  },
+  Login: {
+    screen: Login,
+    params: {
+      title: 'ログイン'
+    },
+    navigationOptions: {
+      title: 'ログイン'
+    }
+  },
+  Register: {
+    screen: Register,
+    params: {
+      title: '新規登録'
+    },
+    navigationOptions: {
+      title: '新規登録'
+    }
+  }
+}, {
+  initialRouteName: 'Select',
+  headerMode: 'none',
+  transitionConfig
+})
+
+const NotLoggedInNavigator = createAnimatedSwitchNavigator({
+  LoginOrRegister: {
+    screen: LoginOrRegisterStackNavigator
+  },
+  AfterLogin: {
+    screen: StackNavigator
+  }
+}, {
+  initialRouteName: 'LoginOrRegister',
+  transition
+})
+
+const RootNavigator = createAnimatedSwitchNavigator({
+  Splash: {
+    screen: Splash
+  },
+  LoggedIn: {
+    screen: StackNavigator
+  },
+  NotLoggedIn: {
+    screen: NotLoggedInNavigator
+  }
+}, {
+  initialRouteName: 'Splash',
+  transition
+})
+
+export default createAppContainer(RootNavigator)

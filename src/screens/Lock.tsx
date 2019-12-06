@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { TouchableWithoutFeedback, StyleSheet } from 'react-native'
 import { Text } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/Feather'
-import { NavigationContainerProps, withNavigation } from 'react-navigation'
+import { useNavigation } from 'react-navigation-hooks'
 import Container from '@/components/Container'
 import Header from '@/components/Header'
 import CircleProgressBar from '@/components/CircleProgressBar'
@@ -19,7 +19,8 @@ const styles = StyleSheet.create({
   }
 })
 
-const Lock = ({ navigation }: NavigationContainerProps) => {
+const Lock = () => {
+  const { state, goBack } = useNavigation()
   const [isLocked, setIsLocked] = useState(true)
   const [isActive, setIsActive] = useState(false)
 
@@ -34,22 +35,24 @@ const Lock = ({ navigation }: NavigationContainerProps) => {
   const handleProgressComplete = async () => {
     console.log('toggle')
     setIsActive(false)
-    const response = await toggleLock()
-    setIsLocked(response.is_locked)
+    const payload = await toggleLock()
+    const { is_locked } = payload.data
+    setIsLocked(is_locked)
   }
 
   return (
     <>
       <Header
-        text={navigation.state.params.title}
-        onMenuButtonPress={() => navigation.toggleDrawer()}
+        text={state.params.title}
+        isStack={true}
+        onMenuButtonPress={() => goBack()}
       />
       <Container isCenter={true}>
         <CircleProgressBar
           size={250}
           lineWidth={1.3}
           backgroundColor='#f7f7f7'
-          progressColor='#000'
+          progressColor='#00b894'
           active={isActive}
           onProgressComplete={handleProgressComplete}
         />
@@ -71,4 +74,4 @@ const Lock = ({ navigation }: NavigationContainerProps) => {
   )
 }
 
-export default withNavigation(Lock)
+export default Lock

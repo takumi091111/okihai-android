@@ -25,6 +25,9 @@
     ],
     "ios": {
       "supportsTablet": true
+    },
+    "android": {
+      "package": "jp.oic.th41_okihai"
     }
   }
 }

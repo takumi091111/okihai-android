@@ -1,6 +1,7 @@
 import React from 'react'
 import { ThemeProvider } from 'react-native-elements'
-import { useBackButton } from '@/utils/hooks'
+import { useAppState } from '@/utils/hooks'
+import { appEnd } from '@/store/actions'
 import AppContainer from '@/navigator'
 
 const theme = {
@@ -23,7 +24,12 @@ const theme = {
 }
 
 export default () => {
-  useBackButton(() => () => null)
+  // バックグラウンド状態になったらデータを書き込み
+  useAppState({
+    onBackground() {
+      appEnd()
+    }
+  })
 
   return (
     <ThemeProvider theme={theme}>
