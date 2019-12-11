@@ -1,20 +1,15 @@
 import React, { useState } from 'react'
 import { View, StyleSheet } from 'react-native'
-import { Input, Button, Overlay, Text } from 'react-native-elements'
+import { Header, Input, Button, Overlay, Text } from 'react-native-elements'
 import { useNavigation } from 'react-navigation-hooks'
 
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 
-import Header from '@/components/Header'
+import Container from '@/components/Container'
 import { login } from '@/store/actions'
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
   innerContainer: {
     width: '100%',
     height: 200,
@@ -78,10 +73,10 @@ const Login = () => {
       password
     }) => {
       const payload = await login(email, password)
-      if (payload.state === null) {
-        setIsModalVisible(true)
-        return
-      }
+      // if (payload.state === null) {
+      //   setIsModalVisible(true)
+      //   return
+      // }
       navigate('AfterLogin')
     }
   })
@@ -89,11 +84,16 @@ const Login = () => {
   return (
     <>
       <Header
-        text={state.params.title}
-        isStack={true}
-        onMenuButtonPress={() => goBack()}
+        centerComponent={{
+          text: state.params.title
+        }}
+        leftComponent={{
+          type: 'feather',
+          icon: 'arrow-left',
+          onPress: () => goBack()
+        }}
       />
-      <View style={styles.container}>
+      <Container isCenter={true}>
         <View style={styles.innerContainer}>
           <Input
             placeholder='メールアドレス'
@@ -146,7 +146,7 @@ const Login = () => {
             />
           </View>
         </Overlay>
-      </View>
+      </Container>
     </>
   )
 }

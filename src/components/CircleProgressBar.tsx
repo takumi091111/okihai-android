@@ -22,6 +22,7 @@ interface Props {
   lineWidth: number
   backgroundColor: string
   progressColor: string
+  fillColor?: string
   active?: boolean
   onProgressComplete?: () => void
 }
@@ -32,6 +33,7 @@ export default (props: Props) => {
     lineWidth,
     backgroundColor,
     progressColor,
+    fillColor = 'none',
     active = false,
     onProgressComplete
   } = props
@@ -104,7 +106,7 @@ export default (props: Props) => {
           cx='16'
           cy='16'
           r='15.9155'
-          fill='none'
+          fill={fillColor}
           stroke={backgroundColor}
           strokeWidth={lineWidth}
         />

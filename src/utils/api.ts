@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { ApiPayload } from '@/interfaces/Payload'
 
-const API_URL = 'https://baca1c62.ngrok.io/api'
+const API_URL = 'https://e435f43c.ngrok.io/api'
 
 const createApiClient = (token: string = '') => {
   if (token === null || token === '') {
@@ -17,7 +17,7 @@ const createApiClient = (token: string = '') => {
   })
 }
 
-export const login = async (email: string, password: string): Promise<ApiPayload> => {
+export const login = async (email: string, password: string, noticeToken?: string): Promise<ApiPayload> => {
   console.log({
     email,
     password
@@ -26,6 +26,9 @@ export const login = async (email: string, password: string): Promise<ApiPayload
   const data = new FormData()
   data.append('email', email)
   data.append('password', password)
+  if (noticeToken) {
+    data.append('notice_token', noticeToken)
+  }
 
   const client = createApiClient()
 
@@ -40,6 +43,25 @@ export const login = async (email: string, password: string): Promise<ApiPayload
     const response = e.response
     return {
       data: response.data || null,
+      statusCode: response.status
+    }
+  }
+}
+
+export const logout = async (token: string) => {
+  const client = createApiClient(token)
+  
+  try {
+    const response = await client.get('/user/logout')
+    return {
+      data: response.data,
+      statusCode: response.status
+    }
+  } catch(e) {
+    console.log('logout error', e)
+    const response = e.response
+    return {
+      data: response.data,
       statusCode: response.status
     }
   }
@@ -90,6 +112,25 @@ export const toggleLock = async (): Promise<ApiPayload> => {
     }
   } catch(e) {
     console.log('toggle failed', e)
+    const response = e.response
+    return {
+      data: response.data || null,
+      statusCode: response.status
+    }
+  }
+}
+
+export const lockStatus = async (token: string): Promise<ApiPayload> => {
+  const client = createApiClient(token)
+
+  try {
+    const response = await client.get('/device/status')
+    return {
+      data: response.data,
+      statusCode: response.status
+    }
+  } catch(e) {
+    console.log('lockStatus failed', e)
     const response = e.response
     return {
       data: response.data || null,

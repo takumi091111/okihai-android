@@ -14,6 +14,10 @@ const theme = {
     }
   },
   Header: {
+    backgroundColor: '#ffffff',
+    containerStyle: {
+      borderBottomColor: '#8e8e93'
+    },
     leftComponentStyle: {
       color: '#1f1f21'
     },

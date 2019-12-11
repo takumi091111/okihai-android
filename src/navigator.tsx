@@ -1,8 +1,8 @@
 import React from 'react'
 import { Easing, Animated } from 'react-native'
-import { createAppContainer, createSwitchNavigator } from 'react-navigation'
+import { createAppContainer } from 'react-navigation'
 import { createStackNavigator } from 'react-navigation-stack'
-import { createDrawerNavigator } from 'react-navigation-drawer'
+import { createBottomTabNavigator } from 'react-navigation-tabs'
 import { Transition } from 'react-native-reanimated'
 import createAnimatedSwitchNavigator from 'react-navigation-animated-switch'
 
@@ -11,8 +11,13 @@ import LoginOrRegister from '@/screens/LoginOrRegister'
 import Login from '@/screens/Login'
 import Logout from '@/screens/Logout'
 import Register from '@/screens/Register'
-import Home from '@/screens/Home'
 import Lock from '@/screens/Lock'
+import BrowseOrEdit from '@/screens/BrowseOrEdit'
+import ProfileBrowse from '@/screens/ProfileBrowse'
+import ProfileEdit from '@/screens/ProfileEdit'
+import Log from '@/screens/Log'
+
+import Icon from 'react-native-vector-icons/Feather'
 
 const transition = (
   <Transition.Together>
@@ -54,46 +59,90 @@ const transitionConfig = () => {
   }
 }
 
-const DrawerNavigator = createDrawerNavigator({
-  Home: {
-    screen: Home,
+const ProfileNavigator = createStackNavigator({
+  BrowseOrEdit: {
+    screen: BrowseOrEdit,
     params: {
-      title: 'ホーム'
+      title: 'プロフィールの閲覧/編集'
     },
     navigationOptions: {
-      title: 'ホーム'
+      title: 'プロフィールの閲覧/編集'
+    }
+  },
+  ProfileBrowse: {
+    screen: ProfileBrowse,
+    params: {
+      title: 'プロフィール'
+    },
+    navigationOptions: {
+      title: 'プロフィール'
+    }
+  },
+  ProfileEdit: {
+    screen: ProfileEdit,
+    params: {
+      title: 'プロフィール編集'
+    },
+    navigationOptions: {
+      title: 'プロフィール編集'
+    }
+  }
+}, {
+  initialRouteName: 'BrowseOrEdit',
+  headerMode: 'none',
+  transitionConfig
+})
+
+const AppNavigator = createBottomTabNavigator({
+  Lock: {
+    screen: Lock,
+    params: {
+      title: 'ロック開閉'
+    },
+    navigationOptions: {
+      title: 'ロック',
+      tabBarIcon: ({ tintColor }) => (
+        <Icon name='lock' size={24} color={tintColor} />
+      )
+    }
+  },
+  Log: {
+    screen: Log,
+    params: {
+      title: '開閉ログ一覧'
+    },
+    navigationOptions: {
+      title: '開閉ログ',
+      tabBarIcon: ({ tintColor }) => (
+        <Icon name='book' size={24} color={tintColor} />
+      )
+    }
+  },
+  Profile: {
+    screen: ProfileNavigator,
+    params: {
+      title: 'プロフィールの閲覧/編集'
+    },
+    navigationOptions: {
+      title: 'プロフィール',
+      tabBarIcon: ({ tintColor }) => (
+        <Icon name='user' size={24} color={tintColor} />
+      )
     }
   },
   Logout: {
     screen: Logout,
-    params: {
-      title: 'ログアウト'
-    },
     navigationOptions: {
-      title: 'ログアウト'
+      title: 'ログアウト',
+      tabBarVisible: false,
+      tabBarButtonComponent: () => null
     }
   }
 }, {
-  initialRouteName: 'Home'
-})
-
-const StackNavigator = createStackNavigator({
-  Main: {
-    screen: DrawerNavigator
-  },
-  Lock: {
-    screen: Lock,
-    params: {
-      title: 'ロック'
-    },
-    navigationOptions: {
-      title: 'ロック'
-    }
+  initialRouteName: 'Lock',
+  tabBarOptions: {
+    activeTintColor: '#00b894'
   }
-}, {
-  initialRouteName: 'Main',
-  headerMode: 'none',
-  transitionConfig
 })
 
 const LoginOrRegisterStackNavigator = createStackNavigator({
@@ -135,7 +184,7 @@ const NotLoggedInNavigator = createAnimatedSwitchNavigator({
     screen: LoginOrRegisterStackNavigator
   },
   AfterLogin: {
-    screen: StackNavigator
+    screen: AppNavigator
   }
 }, {
   initialRouteName: 'LoginOrRegister',
@@ -147,7 +196,7 @@ const RootNavigator = createAnimatedSwitchNavigator({
     screen: Splash
   },
   LoggedIn: {
-    screen: StackNavigator
+    screen: AppNavigator
   },
   NotLoggedIn: {
     screen: NotLoggedInNavigator

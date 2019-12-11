@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
-import { TouchableWithoutFeedback, StyleSheet } from 'react-native'
-import { Text } from 'react-native-elements'
+import React, { useState, useCallback } from 'react'
+import { TouchableWithoutFeedback, StyleSheet, ActivityIndicator } from 'react-native'
+import { Header, Text } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/Feather'
-import { useNavigation } from 'react-navigation-hooks'
+import { useNavigation, useFocusEffect } from 'react-navigation-hooks'
 import Container from '@/components/Container'
-import Header from '@/components/Header'
 import CircleProgressBar from '@/components/CircleProgressBar'
+import { getLockStatus } from '@/store/actions'
 import { toggleLock } from '@/utils/api'
 
 const styles = StyleSheet.create({
@@ -20,9 +20,10 @@ const styles = StyleSheet.create({
 })
 
 const Lock = () => {
-  const { state, goBack } = useNavigation()
+  const { state, navigate } = useNavigation()
   const [isLocked, setIsLocked] = useState(true)
   const [isActive, setIsActive] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const handlePressIn = () => {
     setIsActive(true)
@@ -35,40 +36,70 @@ const Lock = () => {
   const handleProgressComplete = async () => {
     console.log('toggle')
     setIsActive(false)
+    setIsLoading(true)
     const payload = await toggleLock()
     const { is_locked } = payload.data
+    setIsLoading(false)
     setIsLocked(is_locked)
   }
+
+  useFocusEffect(useCallback(() => {
+    const f = async () => {
+      setIsLoading(true)
+      const { state } = await getLockStatus()
+      const { is_locked } = state
+      setIsLocked(is_locked)
+      setIsLoading(false)
+    }
+    f()
+    return () => null
+  }, []))
 
   return (
     <>
       <Header
-        text={state.params.title}
-        isStack={true}
-        onMenuButtonPress={() => goBack()}
+        centerComponent={{
+          text: state.params.title
+        }}
+        rightComponent={{
+          type: 'feather',
+          icon: 'log-out',
+          color: '#ff7675',
+          onPress: () => navigate('Logout')
+        }}
       />
       <Container isCenter={true}>
-        <CircleProgressBar
-          size={250}
-          lineWidth={1.3}
-          backgroundColor='#f7f7f7'
-          progressColor='#00b894'
-          active={isActive}
-          onProgressComplete={handleProgressComplete}
-        />
-        <TouchableWithoutFeedback
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-        >
-          <Icon
-            name={isLocked ? 'lock' : 'unlock'}
-            size={100}
-            style={styles.icon}
-          />
-        </TouchableWithoutFeedback>
-        <Text style={styles.text}>
-          {isLocked ? 'LOCKED' : 'UNLOCKED'}
-        </Text>
+        { isLoading ?
+          <ActivityIndicator
+            size='large'
+            color='#000000'
+          /> :
+          <>
+            <CircleProgressBar
+              size={250}
+              lineWidth={1.3}
+              backgroundColor='#ffffff'
+              progressColor='#00b894'
+              fillColor={isLocked ? '#ff7675' : '#00b894'}
+              active={isActive}
+              onProgressComplete={handleProgressComplete}
+            />
+            <TouchableWithoutFeedback
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
+            >
+              <Icon
+                size={100}
+                color='#f7f7f7'
+                name={isLocked ? 'lock' : 'unlock'}
+                style={styles.icon}
+              />
+            </TouchableWithoutFeedback>
+            <Text style={styles.text}>
+              {isLocked ? 'ロック中' : '解錠済み'}
+            </Text>
+          </>
+        }
       </Container>
     </>
   )

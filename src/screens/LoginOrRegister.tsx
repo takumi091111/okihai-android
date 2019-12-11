@@ -2,13 +2,9 @@ import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Button } from 'react-native-elements'
 import { useNavigation } from 'react-navigation-hooks'
+import Container from '@/components/Container'
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
   innerContainer: {
     width: '100%',
     height: 120,
@@ -47,7 +43,7 @@ const LoginOrRegister = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <Container isCenter={true}>
       <View style={styles.innerContainer}>
         <Button
           title='ログイン'
@@ -76,7 +72,7 @@ const LoginOrRegister = () => {
           onPress={handlePressRegisterButton}
         />
       </View>
-    </View>
+    </Container>
   )
 }
 

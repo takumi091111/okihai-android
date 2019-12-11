@@ -14,12 +14,14 @@ const handleLogout = (state: State) => {
 
 const handleActive = (state: State, payload: State) => {
   state.token = payload.token
+  state.noticeToken = payload.noticeToken
 }
 
 // store
 
 const initialState: State = {
-  token: null as string | null
+  token: null as string | null,
+  noticeToken: null as string | null
 }
 
 export const store = createStore(initialState)
@@ -35,6 +37,9 @@ Logout.watch(() => {
   console.log('logout')
 })
 
-Active.watch(({ token }) => {
-  console.log('active', token)
+Active.watch(({ token, noticeToken }) => {
+  console.log('active', {
+    token,
+    noticeToken
+  })
 })

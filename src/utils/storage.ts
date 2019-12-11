@@ -12,6 +12,14 @@ export const clearToken = async () => {
   AsyncStorage.removeItem('token')
 }
 
+// export const addLog = async () => {
+//   AsyncStorage.setItem('logs')
+// }
+
+// export const removeLogAll = async () => {
+//   AsyncStorage.removeItem('logs')
+// }
+
 export const clearStorage = async () => {
   AsyncStorage.clear()
 }

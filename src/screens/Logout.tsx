@@ -8,6 +8,7 @@ const Logout = () => {
   useFocusEffect(useCallback(() => {
     logout()
     navigate('Splash')
+    return () => null
   }, []))
 
   return null

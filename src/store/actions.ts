@@ -1,6 +1,7 @@
 import { store } from '@/store'
 import { Login, Active, Logout } from '@/store/events'
 import { loadToken, saveToken, clearToken } from '@/utils/storage'
+import { registerForPushNotification } from '@/utils/notification'
 import * as Api from '@/utils/api'
 import { ActionPayload } from '@/interfaces/Payload'
 
@@ -8,7 +9,8 @@ export const login = async (
   email: string,
   password: string
 ): Promise<ActionPayload> => {
-  const response = await Api.login(email, password)
+  const { noticeToken } = await store.getState()
+  const response = await Api.login(email, password, noticeToken)
 
   if (response.statusCode === 200) {
     const token = response.data.token
@@ -64,6 +66,8 @@ export const register = async (
 }
 
 export const logout = async (): Promise<ActionPayload> => {
+  const { token } = store.getState()
+  await Api.logout(token)
   await clearToken()
   return {
     state: Logout(),
@@ -96,17 +100,35 @@ export const loginIfLoggedIn = async (): Promise<ActionPayload> => {
   }
 }
 
+export const getLoggedInUser = async (): Promise<ActionPayload> => {
+  const { token } = store.getState()
+  const result = await Api.loggedInUser(token)
+  console.log({ token, result })
+  
+  return {
+    state: result.data,
+    errors: {}
+  }
+}
+
+export const getLockStatus = async (): Promise<ActionPayload> => {
+  const { token } = store.getState()
+  const result = await Api.lockStatus(token)
+  console.log({ token, result })
+  
+  return {
+    state: result.data,
+    errors: {}
+  }
+}
+
 export const appStart = async (): Promise<ActionPayload> => {
   const token = await loadToken()
-  if (!token) {
-    return {
-      state: null,
-      errors: {}
-    }
-  }
+  const { data } = await registerForPushNotification()
+  const noticeToken = data.token
 
   return {
-    state: Active({ token }),
+    state: Active({ token, noticeToken }),
     errors: {}
   }
 }
