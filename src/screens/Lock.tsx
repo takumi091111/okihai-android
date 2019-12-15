@@ -5,8 +5,7 @@ import Icon from 'react-native-vector-icons/Feather'
 import { useNavigation, useFocusEffect } from 'react-navigation-hooks'
 import Container from '@/components/Container'
 import CircleProgressBar from '@/components/CircleProgressBar'
-import { getLockStatus } from '@/store/actions'
-import { toggleLock } from '@/utils/api'
+import { toggleLock, lockStatus } from '@/utils/api'
 
 const styles = StyleSheet.create({
   icon: {
@@ -19,7 +18,7 @@ const styles = StyleSheet.create({
   }
 })
 
-const Lock = () => {
+export default () => {
   const { state, navigate } = useNavigation()
   const [isLocked, setIsLocked] = useState(true)
   const [isActive, setIsActive] = useState(false)
@@ -34,21 +33,22 @@ const Lock = () => {
   }
 
   const handleProgressComplete = async () => {
-    console.log('toggle')
     setIsActive(false)
     setIsLoading(true)
-    const payload = await toggleLock()
-    const { is_locked } = payload.data
+    const result = await toggleLock()
+    if (result.ok === true) {
+      setIsLocked(result.data.is_locked)
+    }
     setIsLoading(false)
-    setIsLocked(is_locked)
   }
 
   useFocusEffect(useCallback(() => {
     const f = async () => {
       setIsLoading(true)
-      const { state } = await getLockStatus()
-      const { is_locked } = state
-      setIsLocked(is_locked)
+      const result = await lockStatus()
+      if (result.ok === true) {
+        setIsLocked(result.data.is_locked)
+      }
       setIsLoading(false)
     }
     f()
@@ -104,5 +104,3 @@ const Lock = () => {
     </>
   )
 }
-
-export default Lock

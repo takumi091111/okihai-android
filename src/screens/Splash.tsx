@@ -1,13 +1,14 @@
 import React, { useCallback } from 'react'
-import { StyleSheet, Text } from 'react-native'
+import { StyleSheet, Image } from 'react-native'
 import { useNavigation, useFocusEffect } from 'react-navigation-hooks'
-import { appStart, loginIfLoggedIn } from '@/store/actions'
 import Container from '@/components/Container'
+import { UpdateUser } from '@/store/events'
+import { loggedInUser } from '@/utils/api'
 
 const styles = StyleSheet.create({
-  text: {
-    fontSize: 30,
-    letterSpacing: 5
+  icon: {
+    width: 300,
+    height: 300
   }
 })
 
@@ -15,10 +16,11 @@ export default () => {
   const { navigate } = useNavigation()
 
   const navigateToLoggedInOrNotLoggedIn = async () => {
-    await appStart()
-    const payload = await loginIfLoggedIn()
-    const isLoggedIn = payload.state !== null
-    const routeName = isLoggedIn ? 'LoggedIn' : 'NotLoggedIn'
+    const result = await loggedInUser()
+    const routeName = result.ok ? 'LoggedIn' : 'NotLoggedIn'
+    if (result.ok === true) {
+      UpdateUser({ user: result.data })
+    }
     setTimeout(() => {
       navigate(routeName)
     }, 1000)
@@ -31,7 +33,10 @@ export default () => {
 
   return (
     <Container isCenter={true}>
-      <Text style={styles.text}>OKIHAI</Text>
+      <Image
+        source={require('@assets/logo.png')}
+        style={styles.icon}
+      />
     </Container>
   )
 }

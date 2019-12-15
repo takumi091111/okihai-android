@@ -1,23 +1,23 @@
 import React from 'react'
 import { Easing, Animated } from 'react-native'
+import { Transition } from 'react-native-reanimated'
 import { createAppContainer } from 'react-navigation'
 import { createStackNavigator } from 'react-navigation-stack'
 import { createBottomTabNavigator } from 'react-navigation-tabs'
-import { Transition } from 'react-native-reanimated'
 import createAnimatedSwitchNavigator from 'react-navigation-animated-switch'
+import Icon from 'react-native-vector-icons/Feather'
 
 import Splash from '@/screens/Splash'
 import LoginOrRegister from '@/screens/LoginOrRegister'
 import Login from '@/screens/Login'
-import Logout from '@/screens/Logout'
 import Register from '@/screens/Register'
 import Lock from '@/screens/Lock'
+import Log from '@/screens/Log'
 import BrowseOrEdit from '@/screens/BrowseOrEdit'
 import ProfileBrowse from '@/screens/ProfileBrowse'
 import ProfileEdit from '@/screens/ProfileEdit'
-import Log from '@/screens/Log'
-
-import Icon from 'react-native-vector-icons/Feather'
+import Logout from '@/screens/Logout'
+import LogDetail from '@/screens/LogDetail'
 
 const transition = (
   <Transition.Together>
@@ -59,41 +59,7 @@ const transitionConfig = () => {
   }
 }
 
-const ProfileNavigator = createStackNavigator({
-  BrowseOrEdit: {
-    screen: BrowseOrEdit,
-    params: {
-      title: 'プロフィールの閲覧/編集'
-    },
-    navigationOptions: {
-      title: 'プロフィールの閲覧/編集'
-    }
-  },
-  ProfileBrowse: {
-    screen: ProfileBrowse,
-    params: {
-      title: 'プロフィール'
-    },
-    navigationOptions: {
-      title: 'プロフィール'
-    }
-  },
-  ProfileEdit: {
-    screen: ProfileEdit,
-    params: {
-      title: 'プロフィール編集'
-    },
-    navigationOptions: {
-      title: 'プロフィール編集'
-    }
-  }
-}, {
-  initialRouteName: 'BrowseOrEdit',
-  headerMode: 'none',
-  transitionConfig
-})
-
-const AppNavigator = createBottomTabNavigator({
+const LoggedInNavigator = createBottomTabNavigator({
   Lock: {
     screen: Lock,
     params: {
@@ -107,10 +73,30 @@ const AppNavigator = createBottomTabNavigator({
     }
   },
   Log: {
-    screen: Log,
-    params: {
-      title: '開閉ログ一覧'
-    },
+    screen: createStackNavigator({
+      Log: {
+        screen: Log,
+        params: {
+          title: '開閉ログ一覧'
+        },
+        navigationOptions: {
+          title: '開閉ログ一覧'
+        }
+      },
+      LogDetail: {
+        screen: LogDetail,
+        params: {
+          title: 'ログ詳細'
+        },
+        navigationOptions: {
+          title: 'ログ詳細'
+        }
+      }
+    }, {
+      initialRouteName: 'Log',
+      headerMode: 'none',
+      transitionConfig
+    }),
     navigationOptions: {
       title: '開閉ログ',
       tabBarIcon: ({ tintColor }) => (
@@ -119,7 +105,39 @@ const AppNavigator = createBottomTabNavigator({
     }
   },
   Profile: {
-    screen: ProfileNavigator,
+    screen: createStackNavigator({
+      BrowseOrEdit: {
+        screen: BrowseOrEdit,
+        params: {
+          title: 'プロフィールの閲覧/編集'
+        },
+        navigationOptions: {
+          title: 'プロフィールの閲覧/編集'
+        }
+      },
+      ProfileBrowse: {
+        screen: ProfileBrowse,
+        params: {
+          title: 'プロフィール'
+        },
+        navigationOptions: {
+          title: 'プロフィール'
+        }
+      },
+      ProfileEdit: {
+        screen: ProfileEdit,
+        params: {
+          title: 'プロフィール編集'
+        },
+        navigationOptions: {
+          title: 'プロフィール編集'
+        }
+      }
+    }, {
+      initialRouteName: 'BrowseOrEdit',
+      headerMode: 'none',
+      transitionConfig
+    }),
     params: {
       title: 'プロフィールの閲覧/編集'
     },
@@ -145,49 +163,42 @@ const AppNavigator = createBottomTabNavigator({
   }
 })
 
-const LoginOrRegisterStackNavigator = createStackNavigator({
-  Select: {
-    screen: LoginOrRegister,
-    params: {
-      title: 'ログインまたは新規登録'
-    },
-    navigationOptions: {
-      title: 'ログインまたは新規登録'
-    }
-  },
-  Login: {
-    screen: Login,
-    params: {
-      title: 'ログイン'
-    },
-    navigationOptions: {
-      title: 'ログイン'
-    }
-  },
-  Register: {
-    screen: Register,
-    params: {
-      title: '新規登録'
-    },
-    navigationOptions: {
-      title: '新規登録'
-    }
-  }
-}, {
-  initialRouteName: 'Select',
-  headerMode: 'none',
-  transitionConfig
-})
-
 const NotLoggedInNavigator = createAnimatedSwitchNavigator({
   LoginOrRegister: {
-    screen: LoginOrRegisterStackNavigator
+    screen: createStackNavigator({
+      Select: {
+        screen: LoginOrRegister
+      },
+      Login: {
+        screen: Login,
+        params: {
+          title: 'ログイン'
+        },
+        navigationOptions: {
+          title: 'ログイン'
+        }
+      },
+      Register: {
+        screen: Register,
+        params: {
+          title: '新規登録'
+        },
+        navigationOptions: {
+          title: '新規登録'
+        }
+      }
+    }, {
+      initialRouteName: 'Select',
+      headerMode: 'none',
+      transitionConfig
+    })
   },
   AfterLogin: {
-    screen: AppNavigator
+    screen: LoggedInNavigator
   }
 }, {
   initialRouteName: 'LoginOrRegister',
+  headerMode: 'none',
   transition
 })
 
@@ -196,7 +207,7 @@ const RootNavigator = createAnimatedSwitchNavigator({
     screen: Splash
   },
   LoggedIn: {
-    screen: AppNavigator
+    screen: LoggedInNavigator
   },
   NotLoggedIn: {
     screen: NotLoggedInNavigator

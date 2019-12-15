@@ -1,17 +1,20 @@
 import { useCallback } from 'react'
 import { useNavigation, useFocusEffect } from 'react-navigation-hooks'
-import { logout } from '@/store/actions'
+import { Logout } from '@/store/events'
+import { logout } from '@/utils/api'
 
-const Logout = () => {
+export default () => {
   const { navigate } = useNavigation()
 
   useFocusEffect(useCallback(() => {
-    logout()
-    navigate('Splash')
+    const f = async () => {
+      Logout()
+      await logout()
+      navigate('Splash')
+    }
+    f()
     return () => null
   }, []))
 
   return null
 }
-
-export default Logout

@@ -1,159 +1,243 @@
-import axios from 'axios'
-import { ApiPayload } from '@/interfaces/Payload'
+import axios, { AxiosError } from 'axios'
+import { AsyncStorage } from 'react-native'
+import { errorHandler } from '@/utils/errorHandlers'
+import { Result } from '@/interfaces/Result'
+import { User } from '@/interfaces/User'
+import { Log } from '@/interfaces/Log'
 
-const API_URL = 'https://e435f43c.ngrok.io/api'
+const API_URL = 'https://414c4238.ap.ngrok.io/api'
 
-const createApiClient = (token: string = '') => {
-  if (token === null || token === '') {
-    return axios.create({
-      baseURL: API_URL
-    })
+const client = axios.create({ baseURL: API_URL })
+
+client.interceptors.request.use(async (request) => {
+  const token = await AsyncStorage.getItem('token')
+  request.headers = {
+    'Authorization': token ? `Bearer ${token}` : ''
   }
-  return axios.create({
-    baseURL: API_URL,
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  })
+  return request
+})
+
+client.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError) => Promise.reject(errorHandler(error))
+)
+
+interface LoginData {
+  token: string
 }
 
-export const login = async (email: string, password: string, noticeToken?: string): Promise<ApiPayload> => {
-  console.log({
-    email,
-    password
-  })
+interface RegisterData {
+  user: User,
+  token: string
+}
 
+interface LockData {
+  is_locked: boolean
+}
+
+interface PostErrorData {
+  errors?: {
+    [key: string]: string[]
+  }
+}
+
+export const login = async (
+  { email, password }: Pick<User, 'email' | 'password'>,
+  noticeToken?: string
+) => {
   const data = new FormData()
+
   data.append('email', email)
   data.append('password', password)
   if (noticeToken) {
     data.append('notice_token', noticeToken)
   }
 
-  const client = createApiClient()
-
-  try {
-    const response = await client.post('/user/login', data)
-    return {
-      data: response.data,
-      statusCode: response.status
-    }
-  } catch(e) {
-    console.log('login error', e)
-    const response = e.response
-    return {
-      data: response.data || null,
-      statusCode: response.status
-    }
-  }
+  return client.post<LoginData>('/user/login', data)
+    .then(response => {
+      const { data, status } = response
+      return {
+        data,
+        ok: true,
+        statusCode: status
+      }
+    })
+    .catch((error: AxiosError<null>) => {
+      const { data, status } = error.response
+      return {
+        data,
+        ok: false,
+        statusCode: status
+      }
+    }) as Promise<Result<LoginData, null>>
 }
 
-export const logout = async (token: string) => {
-  const client = createApiClient(token)
-  
-  try {
-    const response = await client.get('/user/logout')
-    return {
-      data: response.data,
-      statusCode: response.status
-    }
-  } catch(e) {
-    console.log('logout error', e)
-    const response = e.response
-    return {
-      data: response.data,
-      statusCode: response.status
-    }
-  }
+export const logout = async () => {
+  return client.get<null>('/user/logout')
+    .then(response => {
+      const { data, status } = response
+      return {
+        data,
+        ok: true,
+        statusCode: status
+      }
+    })
+    .catch((error: AxiosError<null>) => {
+      const { data, status } = error.response
+      return {
+        data,
+        ok: false,
+        statusCode: status
+      }
+    }) as Promise<Result<null, null>>
 }
 
-export const register = async (name: string, address: string, email: string, password: string, device_id: string): Promise<ApiPayload> => {
-  console.log({
+export const register = async (user: User) => {
+  const {
     name,
     address,
     email,
     password,
     device_id
-  })
-  
+  } = user
+
   const data = new FormData()
-  data.append('name', name)
-  data.append('address', address)
-  data.append('email', email)
-  data.append('password', password)
-  data.append('device_id', device_id)
+  if (name) data.append('name', name)
+  if (address) data.append('address', address)
+  if (email) data.append('email', email)
+  if (password) data.append('password', password)
+  if (device_id) data.append('device_id', device_id)
 
-  const client = createApiClient()
-
-  try {
-    const response = await client.post('/user/register', data)
-    return {
-      data: response.data,
-      statusCode: response.status
-    }
-  } catch(e) {
-    console.log('register error', e)
-    const response = e.response
-    return {
-      data: response.data || null,
-      statusCode: response.status
-    }
-  }
+  return client.post<RegisterData>('/user/register', data)
+    .then(response => {
+      const { data, status } = response
+      return {
+        data,
+        ok: true,
+        statusCode: status
+      }
+    })
+    .catch((error: AxiosError<PostErrorData>) => {
+      const { data, status } = error.response
+      return {
+        data,
+        ok: false,
+        statusCode: status,
+        error: data?.errors
+      }
+    }) as Promise<Result<RegisterData, PostErrorData>>
 }
 
-export const toggleLock = async (): Promise<ApiPayload> => {
-  const client = createApiClient()
-
-  try {
-    const response = await client.get('/toggle')
-    return {
-      data: response.data,
-      statusCode: response.status
-    }
-  } catch(e) {
-    console.log('toggle failed', e)
-    const response = e.response
-    return {
-      data: response.data || null,
-      statusCode: response.status
-    }
-  }
+export const toggleLock = async () => {
+  return client.get<LockData>('/toggle')
+    .then(response => {
+      const { data, status } = response
+      return {
+        data,
+        ok: true,
+        statusCode: status
+      }
+    })
+    .catch((error: AxiosError<null>) => {
+      const { data, status } = error.response
+      return {
+        data,
+        ok: false,
+        statusCode: status
+      }
+  }) as Promise<Result<LockData, null>>
 }
 
-export const lockStatus = async (token: string): Promise<ApiPayload> => {
-  const client = createApiClient(token)
-
-  try {
-    const response = await client.get('/device/status')
-    return {
-      data: response.data,
-      statusCode: response.status
-    }
-  } catch(e) {
-    console.log('lockStatus failed', e)
-    const response = e.response
-    return {
-      data: response.data || null,
-      statusCode: response.status
-    }
-  }
+export const lockStatus = async () => {
+  return client.get<LockData>('/device/status')
+    .then(response => {
+      const { data, status } = response
+      return {
+        data,
+        ok: true,
+        statusCode: status
+      }
+    })
+    .catch((error: AxiosError<null>) => {
+      const { data, status } = error.response
+      return {
+        data,
+        ok: false,
+        statusCode: status
+      }
+    }) as Promise<Result<LockData, null>>
 }
 
-export const loggedInUser = async (token: string): Promise<ApiPayload> => {
-  const client = createApiClient(token)
+export const loggedInUser = async () => {
+  return client.get<User>('/user/logged_in')
+    .then(response => {
+      const { data, status } = response
+      return {
+        data,
+        ok: true,
+        statusCode: status
+      }
+    })
+    .catch((error: AxiosError<null>) => {
+      const { data, status } = error.response
+      return {
+        data,
+        ok: false,
+        statusCode: status
+      }
+    }) as Promise<Result<User, null>>
+}
 
-  try {
-    const response = await client.get('/user/logged_in')
-    return {
-      data: response.data,
-      statusCode: response.status
-    }
-  } catch(e) {
-    console.log('me failed', e)
-    const response = e.response
-    return {
-      data: response.data || null,
-      statusCode: response.status
-    }
-  }
+export const updateUser = async (user: Partial<Omit<User, 'device_id'>>) => {
+  const {
+    name,
+    address,
+    email,
+    password
+  } = user
+
+  const data = new FormData()
+  if (name) data.append('name', name)
+  if (address) data.append('address', address)
+  if (email) data.append('email', email)
+  if (password) data.append('password', password)
+
+  return client.post<User>('/user/update', data)
+    .then(response => {
+      const { data, status } = response
+      return {
+        data,
+        ok: true,
+        statusCode: status
+      }
+    })
+    .catch((error: AxiosError<PostErrorData>) => {
+      const { data, status } = error.response
+      return {
+        data,
+        ok: false,
+        statusCode: status,
+        error: data.errors
+      }
+  }) as Promise<Result<User, PostErrorData>>
+}
+
+export const logList = async () => {
+  return client.get<Log[]>('/log/list')
+    .then(response => {
+      const { data, status } = response
+      return {
+        data,
+        ok: true,
+        statusCode: status
+      }
+    })
+    .catch((error: AxiosError<null>) => {
+      const { data, status } = error.response
+      return {
+        data,
+        ok: false,
+        statusCode: status
+      }
+  }) as Promise<Result<Log[], null>>
 }

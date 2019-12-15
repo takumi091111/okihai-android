@@ -1,12 +1,13 @@
-import React, { useState } from 'react'
-import { View, StyleSheet } from 'react-native'
-import { Header, Input, Button, Overlay, Text } from 'react-native-elements'
+import React from 'react'
+import { View, StyleSheet, KeyboardAvoidingView } from 'react-native'
+import { Header, Input, Button } from 'react-native-elements'
 import { useNavigation } from 'react-navigation-hooks'
-
-import * as yup from 'yup'
-import { useFormik } from 'formik'
-import { register } from '@/store/actions'
 import Container from '@/components/Container'
+
+import { useFormik } from 'formik'
+import { registerSchema } from '@/utils/validation'
+import { Login, UpdateUser } from '@/store/events'
+import { register } from '@/utils/api'
 
 const styles = StyleSheet.create({
   innerContainer: {
@@ -44,9 +45,8 @@ const styles = StyleSheet.create({
   }
 })
 
-const Login = () => {
+export default () => {
   const { navigate, state, goBack } = useNavigation()
-  const [isModalVisible, setIsModalVisible] = useState(false)
 
   const {
     values,
@@ -57,62 +57,40 @@ const Login = () => {
     submitForm
   } = useFormik({
     initialValues: {
-      name: 'たけし',
-      address: '大阪fuuuuu',
-      email: 'tks@gmail.com',
-      password: 'secret',
+      name: '',
+      address: '',
+      email: '',
+      password: '',
       device_id: '0000-0000-0000-0000'
     },
-    validationSchema: yup.object().shape({
-      name: yup.string()
-        .max(255, '名前は255文字以内である必要があります')
-        .required('有効な名前を入力してください'),
-      address: yup.string()
-        .max(255, '住所は255文字以内である必要があります')
-        .required('有効な住所を入力してください'),
-      email: yup.string()
-        .email('有効なメールアドレスを入力してください')
-        .required('有効なメールアドレスを入力してください'),
-      password: yup.string()
-        .min(6, 'パスワードは6文字以上である必要があります')
-        .required('有効なパスワードを入力してください'),
-      device_id: yup.string()
-        .matches(/^\d{4}-\d{4}-\d{4}-\d{4}$/, 'デバイスIDはxxxx-xxxx-xxxx-xxxxの形式である必要があります')
-        .required('有効なデバイスIDを入力してください')
-    }),
-    onSubmit: async ({
-      name,
-      address,
-      email,
-      password,
-      device_id
-    }, { setErrors }) => {
-      const payload = await register(name, address, email, password, device_id)
-      const joinedErrorOrEmpty = (errors?: string[]) => {
-        if (!errors) return ''
-        return errors.join('\n').trim()
+    validationSchema: registerSchema,
+    onSubmit: async (user, { setErrors }) => {
+      const result = await register(user)
+
+      if (result.ok === true) {
+        Login({ token: result.data.token })
+        UpdateUser({ user: result.data.user })
+        navigate('AfterLogin')
+      } else {
+        if (result.statusCode === 422) {
+          setErrors({
+            name: result.error['name'] || '',
+            address: result.error['address'] || '',
+            email: result.error['email'] || '',
+            password: result.error['password'] || '',
+            device_id: result.error['device_id'] || ''
+          })
+        }
       }
-      if (Object.keys(payload.errors).length >= 1) {
-        console.log('422', payload.errors)
-        setErrors({
-          name: joinedErrorOrEmpty(payload.errors['name']),
-          address: joinedErrorOrEmpty(payload.errors['address']),
-          email: joinedErrorOrEmpty(payload.errors['email']),
-          password: joinedErrorOrEmpty(payload.errors['password']),
-          device_id: joinedErrorOrEmpty(payload.errors['device_id'])
-        })
-        return
-      }
-      if (payload.state === null) {
-        setIsModalVisible(true)
-        return
-      }
-      navigate('AfterLogin')
     }
   })
 
   return (
-    <>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ flex: 1 }}
+      behavior='position'
+    >
       <Header
         centerComponent={{
           text: state.params.title
@@ -136,6 +114,7 @@ const Login = () => {
             onChangeText={handleChange('name') as any}
             onBlur={handleBlur('name') as any}
             inputStyle={styles.input}
+            textContentType='name'
           />
           <Input
             placeholder='住所'
@@ -148,6 +127,7 @@ const Login = () => {
             onChangeText={handleChange('address') as any}
             onBlur={handleBlur('address') as any}
             inputStyle={styles.input}
+            textContentType='fullStreetAddress'
           />
           <Input
             placeholder='メールアドレス'
@@ -160,6 +140,8 @@ const Login = () => {
             onChangeText={handleChange('email') as any}
             onBlur={handleBlur('email') as any}
             inputStyle={styles.input}
+            keyboardType='ascii-capable'
+            textContentType='emailAddress'
           />
           <Input
             secureTextEntry={true}
@@ -173,6 +155,8 @@ const Login = () => {
             onChangeText={handleChange('password') as any}
             onBlur={handleBlur('password') as any}
             inputStyle={styles.input}
+            keyboardType='ascii-capable'
+            textContentType='password'
           />
           <Input
             placeholder='置き配ボックスID'
@@ -185,6 +169,7 @@ const Login = () => {
             onChangeText={handleChange('device_id') as any}
             onBlur={handleBlur('device_id') as any}
             inputStyle={styles.input}
+            keyboardType='number-pad'
           />
           <Button
             title='登録'
@@ -195,26 +180,7 @@ const Login = () => {
             onPress={submitForm}
           />
         </View>
-        <Overlay
-          isVisible={isModalVisible}
-          width='80%'
-          height={150}
-          animated={true}
-          animationType='fade'
-        >
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalHeadingText}>通信エラー</Text>
-            <Text>新規登録に失敗しました</Text>
-            <Button
-              title='OK'
-              containerStyle={styles.modalButtonContainer}
-              onPress={() => setIsModalVisible(false)}
-            />
-          </View>
-        </Overlay>
       </Container>
-    </>
+    </KeyboardAvoidingView>
   )
 }
-
-export default Login

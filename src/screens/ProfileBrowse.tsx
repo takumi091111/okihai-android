@@ -2,9 +2,9 @@ import React, { useState, useCallback } from 'react'
 import { View, StyleSheet, ActivityIndicator } from 'react-native'
 import { Header, Input } from 'react-native-elements'
 import { useNavigation, useFocusEffect } from 'react-navigation-hooks'
-
 import Container from '@/components/Container'
-import { getLoggedInUser } from '@/store/actions'
+import { useStore } from 'effector-react'
+import { store } from '@/store'
 
 const styles = StyleSheet.create({
   innerContainer: {
@@ -42,7 +42,8 @@ const styles = StyleSheet.create({
   }
 })
 
-const Profile = () => {
+export default () => {
+  const { user } = useStore(store)
   const { state, goBack } = useNavigation()
   const [isLoading, setIsLoading] = useState(true)
   const [values, setValues] = useState({
@@ -55,14 +56,7 @@ const Profile = () => {
   useFocusEffect(useCallback(() => {
     const f = async () => {
       setIsLoading(true)
-      const { state } = await getLoggedInUser()
-      const { name, address, email, device_id } = state
-      setValues({
-        name,
-        address,
-        email,
-        device_id
-      })
+      setValues({ ...user })
       setIsLoading(false)
     }
     f()
@@ -138,5 +132,3 @@ const Profile = () => {
     </>
   )
 }
-
-export default Profile

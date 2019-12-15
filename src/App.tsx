@@ -1,8 +1,10 @@
 import React from 'react'
 import { ThemeProvider } from 'react-native-elements'
-import { useAppState } from '@/utils/hooks'
-import { appEnd } from '@/store/actions'
-import AppContainer from '@/navigator'
+import AppContainer from '@/utils/navigator'
+import ErrorDialog from '@/components/ErrorDialog'
+import { useStore } from 'effector-react'
+import { store } from '@/store'
+import { ToggleErrorDialog } from '@/store/events'
 
 const theme = {
   colors: {
@@ -28,16 +30,19 @@ const theme = {
 }
 
 export default () => {
-  // バックグラウンド状態になったらデータを書き込み
-  useAppState({
-    onBackground() {
-      appEnd()
-    }
-  })
+  const { errorDialog } = useStore(store)
+
+  const handleButtonPress = () => ToggleErrorDialog()
 
   return (
     <ThemeProvider theme={theme}>
       <AppContainer />
+      <ErrorDialog
+        title={errorDialog.title}
+        message={errorDialog.message}
+        isVisible={errorDialog.isVisible}
+        onPressButton={handleButtonPress}
+      />
     </ThemeProvider>
   )
 }

@@ -1,18 +1,22 @@
 import React, { useState, useCallback } from 'react'
-import { View, StyleSheet, ActivityIndicator } from 'react-native'
-import { Header, Input, Button, Overlay, Text } from 'react-native-elements'
+import { View, StyleSheet, KeyboardAvoidingView, ActivityIndicator } from 'react-native'
+import { Header, Input, Button } from 'react-native-elements'
 import { useNavigation, useFocusEffect } from 'react-navigation-hooks'
-
-import * as yup from 'yup'
-import { useFormik } from 'formik'
-
+import Toast from 'react-native-root-toast'
 import Container from '@/components/Container'
-import { getLoggedInUser } from '@/store/actions'
+import { useStore } from 'effector-react'
+import { store } from '@/store'
+import { UpdateUser } from '@/store/events'
+import { User } from '@/interfaces/User'
+
+import { useFormik } from 'formik'
+import { profileEditSchema } from '@/utils/validation'
+import { updateUser } from '@/utils/api'
 
 const styles = StyleSheet.create({
   innerContainer: {
     width: '100%',
-    height: 400,
+    height: 300,
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 50
@@ -45,11 +49,11 @@ const styles = StyleSheet.create({
   }
 })
 
-const ProfileEdit = () => {
+export default () => {
+  const { user } = useStore(store)
   const { state, goBack } = useNavigation()
-  const [isModalVisible, setIsModalVisible] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [values, setValues] = useState({
+  const [userValues, setUserValues] = useState({
     name: '',
     address: '',
     email: '',
@@ -59,14 +63,7 @@ const ProfileEdit = () => {
   useFocusEffect(useCallback(() => {
     const f = async () => {
       setIsLoading(true)
-      const { state } = await getLoggedInUser()
-      const { name, address, email, device_id } = state
-      setValues({
-        name,
-        address,
-        email,
-        password: ''
-      })
+      setUserValues({ ...user })
       setIsLoading(false)
     }
     f()
@@ -78,63 +75,64 @@ const ProfileEdit = () => {
     isSubmitting,
     handleBlur,
     handleChange,
-    submitForm
+    submitForm,
+    values
   } = useFormik({
-    initialValues: {
-      name: '',
-      address: '',
-      email: '',
-      password: ''
-    },
-    validationSchema: yup.object().shape({
-      name: yup.string()
-        .max(255, '名前は255文字以内である必要があります')
-        .required('有効な名前を入力してください'),
-      address: yup.string()
-        .max(255, '住所は255文字以内である必要があります')
-        .required('有効な住所を入力してください'),
-      email: yup.string()
-        .email('有効なメールアドレスを入力してください')
-        .required('有効なメールアドレスを入力してください'),
-      password: yup.string()
-        .min(6, 'パスワードは6文字以上である必要があります')
-        .required('有効なパスワードを入力してください'),
-      device_id: yup.string()
-        .matches(/^\d{4}-\d{4}-\d{4}-\d{4}$/, 'デバイスIDはxxxx-xxxx-xxxx-xxxxの形式である必要があります')
-        .required('有効なデバイスIDを入力してください')
-    }),
+    initialValues: userValues,
+    enableReinitialize: true,
+    validationSchema: profileEditSchema,
     onSubmit: async ({
       name,
       address,
       email,
       password
     }, { setErrors }) => {
-      // const payload = await register(name, address, email, password, device_id)
-      // const joinedErrorOrEmpty = (errors?: string[]) => {
-      //   if (!errors) return ''
-      //   return errors.join('\n').trim()
-      // }
-      // if (Object.keys(payload.errors).length >= 1) {
-      //   console.log('422', payload.errors)
-      //   setErrors({
-      //     name: joinedErrorOrEmpty(payload.errors['name']),
-      //     address: joinedErrorOrEmpty(payload.errors['address']),
-      //     email: joinedErrorOrEmpty(payload.errors['email']),
-      //     password: joinedErrorOrEmpty(payload.errors['password']),
-      //     device_id: joinedErrorOrEmpty(payload.errors['device_id'])
-      //   })
-      //   return
-      // }
-      // if (payload.state === null) {
-      //   setIsModalVisible(true)
-      //   return
-      // }
-      // navigate('AfterLogin')
+      type ConditionUser = Omit<User, 'id' | 'device_id' | 'created_at' | 'updated_at'>
+      type Condition = Record<keyof ConditionUser, boolean>
+
+      // 変更があればtrue, なければfalse
+      const condition: Condition = {
+        name: name !== userValues.name,
+        address: address !== userValues.address,
+        email: email !== userValues.email,
+        password: password !== userValues.password
+      }
+
+      // 変更がない場合は処理を行わない
+      const isOK = !Object.values(condition).every(v => v === false)
+      if (!isOK) return
+
+      const data: Partial<Omit<User, 'device_id'>> = {}
+      if (condition.name) data.name = name
+      if (condition.address) data.address = address
+      if (condition.email) data.email = email
+      if (condition.password) data.password = password
+
+      const result = await updateUser(data)
+
+      if (result.ok === true) {
+        UpdateUser({ user: result.data })
+        const toast = Toast.show('更新しました')
+        setTimeout(() => Toast.hide(toast), 2000)
+      } else {
+        if (result.statusCode === 422) {
+          setErrors({
+            name: result.error['name'] || '',
+            address: result.error['address'] || '',
+            email: result.error['email'] || '',
+            password: result.error['password'] || ''
+          })
+        }
+      }
     }
   })
 
   return (
-    <>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ flex: 1 }}
+      behavior='padding'
+    >
       <Header
         centerComponent={{
           text: state.params.title
@@ -190,19 +188,6 @@ const ProfileEdit = () => {
             />
             <Input
               secureTextEntry={true}
-              placeholder='パスワード'
-              leftIcon={{
-                type: 'feather',
-                name: 'lock'
-              }}
-              value={values.password}
-              errorMessage={errors.password}
-              onChangeText={handleChange('password') as any}
-              onBlur={handleBlur('password') as any}
-              inputStyle={styles.input}
-            />
-            <Input
-              secureTextEntry={true}
               placeholder='新しいパスワード'
               leftIcon={{
                 type: 'feather',
@@ -224,26 +209,7 @@ const ProfileEdit = () => {
             />
           </View>
         }
-        <Overlay
-          isVisible={isModalVisible}
-          width='80%'
-          height={150}
-          animated={true}
-          animationType='fade'
-        >
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalHeadingText}>通信エラー</Text>
-            <Text>ユーザ情報更新に失敗しました</Text>
-            <Button
-              title='OK'
-              containerStyle={styles.modalButtonContainer}
-              onPress={() => setIsModalVisible(false)}
-            />
-          </View>
-        </Overlay>
       </Container>
-    </>
+    </KeyboardAvoidingView>
   )
 }
-
-export default ProfileEdit

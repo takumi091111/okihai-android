@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "axios": "^0.19.0",
+    "dayjs": "^1.8.17",
     "effector": "^20.6.1",
     "effector-react": "^20.4.1",
     "expo": "^35.0.0",

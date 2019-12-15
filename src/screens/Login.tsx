@@ -1,13 +1,15 @@
-import React, { useState } from 'react'
-import { View, StyleSheet } from 'react-native'
-import { Header, Input, Button, Overlay, Text } from 'react-native-elements'
+import React from 'react'
+import { View, StyleSheet, KeyboardAvoidingView, AsyncStorage } from 'react-native'
+import { Header, Input, Button } from 'react-native-elements'
 import { useNavigation } from 'react-navigation-hooks'
-
-import * as yup from 'yup'
-import { useFormik } from 'formik'
-
 import Container from '@/components/Container'
-import { login } from '@/store/actions'
+
+import { useFormik } from 'formik'
+import { loginSchema } from '@/utils/validation'
+import { useStore } from 'effector-react'
+import { store } from '@/store'
+import { Login, UpdateUser } from '@/store/events'
+import { login, loggedInUser } from '@/utils/api'
 
 const styles = StyleSheet.create({
   innerContainer: {
@@ -45,9 +47,9 @@ const styles = StyleSheet.create({
   }
 })
 
-const Login = () => {
+export default () => {
+  const { noticeToken } = useStore(store)
   const { navigate, state, goBack } = useNavigation()
-  const [isModalVisible, setIsModalVisible] = useState(false)
 
   const {
     values,
@@ -58,31 +60,38 @@ const Login = () => {
     submitForm
   } = useFormik({
     initialValues: {
-      email: 'hoge@gmail.com',
+      // email: 'hoge@gmail.com',
+      // password: 'secret'
+      email: 'takashi2@gmail.com',
       password: 'secret'
     },
-    validationSchema: yup.object().shape({
-      email: yup.string()
-        .email('有効なメールアドレスを入力してください')
-        .required('有効なメールアドレスを入力してください'),
-      password: yup.string()
-        .required('有効なパスワードを入力してください')
-    }),
+    validationSchema: loginSchema,
     onSubmit: async ({
       email,
       password
     }) => {
-      const payload = await login(email, password)
-      // if (payload.state === null) {
-      //   setIsModalVisible(true)
-      //   return
-      // }
-      navigate('AfterLogin')
+      const loginResult = await login({ email, password }, noticeToken)
+      if (loginResult.ok === true) {
+        Login({ token: loginResult.data.token })
+
+        await AsyncStorage.setItem('token', loginResult.data.token)
+        const loggedInResult = await loggedInUser()
+
+        if (loggedInResult.ok === true) {
+          UpdateUser({ user: loggedInResult.data })
+        }
+
+        navigate('AfterLogin')
+      }
     }
   })
 
   return (
-    <>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ flex: 1 }}
+      behavior='padding'
+    >
       <Header
         centerComponent={{
           text: state.params.title
@@ -129,26 +138,7 @@ const Login = () => {
             onPress={submitForm}
           />
         </View>
-        <Overlay
-          isVisible={isModalVisible}
-          width='80%'
-          height={150}
-          animated={true}
-          animationType='fade'
-        >
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalHeadingText}>ログインに失敗</Text>
-            <Text>メールアドレスまたはパスワードが正しくありません</Text>
-            <Button
-              title='OK'
-              containerStyle={styles.modalButtonContainer}
-              onPress={() => setIsModalVisible(false)}
-            />
-          </View>
-        </Overlay>
       </Container>
-    </>
+    </KeyboardAvoidingView>
   )
 }
-
-export default Login

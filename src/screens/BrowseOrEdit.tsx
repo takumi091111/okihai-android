@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   }
 })
 
-const LoginOrRegister = () => {
+export default () => {
   const { state, navigate } = useNavigation()
 
   const handlePressBrowseButton = () => {
@@ -62,7 +62,7 @@ const LoginOrRegister = () => {
             title='閲覧'
             icon={{
               type: 'feather',
-              name: 'log-in',
+              name: 'user',
               color: 'white'
             }}
             containerStyle={styles.buttonContainer}
@@ -89,5 +89,3 @@ const LoginOrRegister = () => {
     </>
   )
 }
-
-export default LoginOrRegister

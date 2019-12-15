@@ -1,12 +1,14 @@
 import { Notifications } from 'expo'
 import { getAsync, askAsync, NOTIFICATIONS } from 'expo-permissions'
-import { Result, Error } from '@/interfaces/Payload'
+import { Result } from '@/interfaces/Result'
 
-interface Token {
+interface TokenData {
   token: string
 }
 
-export const registerForPushNotification = async (): Promise<Result<Token> & Error> => {
+type NotificationResult = Omit<Result<TokenData, null>, 'statusCode'>
+
+export const registerForPushNotification = async (): Promise<NotificationResult> => {
   // 通知へのアクセス許可を取得
   const { status: existingStatus } = await getAsync(NOTIFICATIONS)
   let finalStatus = existingStatus
@@ -20,11 +22,7 @@ export const registerForPushNotification = async (): Promise<Result<Token> & Err
   // アクセス許可をしなかった場合
   if (finalStatus !== 'granted') {
     return {
-      success: false,
-      errorMessage: 'Not granted',
-      data: {
-        token: null
-      }
+      ok: false
     }
   }
 
@@ -32,7 +30,7 @@ export const registerForPushNotification = async (): Promise<Result<Token> & Err
   const token = await Notifications.getExpoPushTokenAsync()
 
   return {
-    success: true,
+    ok: true,
     data: {
       token
     }

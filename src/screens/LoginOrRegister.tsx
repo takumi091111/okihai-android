@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   }
 })
 
-const LoginOrRegister = () => {
+export default () => {
   const { navigate } = useNavigation()
 
   const handlePressLoginButton = () => {
@@ -75,5 +75,3 @@ const LoginOrRegister = () => {
     </Container>
   )
 }
-
-export default LoginOrRegister
