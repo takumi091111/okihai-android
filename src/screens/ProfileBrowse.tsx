@@ -9,7 +9,7 @@ import { store } from '@/store'
 const styles = StyleSheet.create({
   innerContainer: {
     width: '100%',
-    height: 300,
+    height: 350,
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 50
@@ -47,6 +47,7 @@ export default () => {
   const { state, goBack } = useNavigation()
   const [isLoading, setIsLoading] = useState(true)
   const [values, setValues] = useState({
+    id: 0,
     name: '',
     address: '',
     email: '',
@@ -56,7 +57,13 @@ export default () => {
   useFocusEffect(useCallback(() => {
     const f = async () => {
       setIsLoading(true)
-      setValues({ ...user })
+      setValues({
+        id: user.id,
+        name: user.name,
+        address: user.address,
+        email: user.email,
+        device_id: user.device_id
+      })
       setIsLoading(false)
     }
     f()
@@ -82,6 +89,17 @@ export default () => {
             color='#000000'
           /> :
           <View style={styles.innerContainer}>
+            <Input
+              label='ユーザID'
+              placeholder='ユーザID'
+              leftIcon={{
+                type: 'feather',
+                name: 'tag'
+              }}
+              value={values.id.toString()}
+              inputStyle={styles.input}
+              editable={false}
+            />
             <Input
               label='名前'
               placeholder='名前'
