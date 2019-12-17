@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, ActivityIndicator } from 'react-native'
 import { Header, ListItem } from 'react-native-elements'
 import { useNavigation, useFocusEffect } from 'react-navigation-hooks'
 import dayjs from 'dayjs'
@@ -23,13 +23,16 @@ const styles = StyleSheet.create({
 export default () => {
   const { state, navigate } = useNavigation()
   const [logs, setLogs] = useState([] as Log[])
+  const [isLoading, setIsLoading] = useState(false)
 
   useFocusEffect(useCallback(() => {
     const f = async () => {
+      setIsLoading(true)
       const result = await logList()
       if (result.ok === true) {
         setLogs(result.data)
       }
+      setIsLoading(false)
     }
     f()
     return () => null
@@ -48,30 +51,36 @@ export default () => {
           onPress: () => navigate('Logout')
         }}
       />
-      <Container>
-        { logs.map((log) => {
-          const style = {
-            ...styles.listItem,
-            ...styles[log.operation]
-          }
-          const operator = log.employee_id === null ? 'ユーザー' : '配達員'
-          const lockStatus = log.operation === 'open' ? '解錠' : '施錠'
-          const title = `${lockStatus} / ${operator}`
-          return (
-            <ListItem key={log.id}
-              leftIcon={{
-                type: 'feather',
-                name: log.operation === 'open' ? 'unlock' : 'lock'
-              }}
-              title={title}
-              subtitle={dayjs(log.created_at).format('YYYY年MM月DD日 HH時mm分')}
-              chevron={{ color: '#8e8e93', size: 30 }}
-              containerStyle={style}
-              bottomDivider={true}
-              onPress={() => navigate('LogDetail', { log })}
-            />
-          )
-        }) }
+      <Container isCenter={isLoading}>
+        { isLoading ?
+          <ActivityIndicator
+            size='large'
+            color='#000000'
+          /> :
+          logs.map((log) => {
+            const style = {
+              ...styles.listItem,
+              ...styles[log.operation]
+            }
+            const operator = log.employee_id === null ? 'ユーザー' : '配達員'
+            const lockStatus = log.operation === 'open' ? '解錠' : '施錠'
+            const title = `${lockStatus} / ${operator}`
+            return (
+              <ListItem key={log.id}
+                leftIcon={{
+                  type: 'feather',
+                  name: log.operation === 'open' ? 'unlock' : 'lock'
+                }}
+                title={title}
+                subtitle={dayjs(log.created_at).format('YYYY年MM月DD日 HH時mm分')}
+                chevron={{ color: '#8e8e93', size: 30 }}
+                containerStyle={style}
+                bottomDivider={true}
+                onPress={() => navigate('LogDetail', { log })}
+              />
+            )
+          })
+        }
       </Container>
     </>
   )
