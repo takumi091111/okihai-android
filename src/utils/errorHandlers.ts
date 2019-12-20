@@ -58,7 +58,8 @@ const showPostError = (error: AxiosError<ErrorData>): AxiosError<ErrorData> => {
 
 const handlers = {
   401: showUnauthorizedError,
-  422: showPostError
+  422: showPostError,
+  500: (error: AxiosError<null>) => error
 }
 
 export const errorHandler = (error: AxiosError): AxiosError => {

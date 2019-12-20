@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { TouchableWithoutFeedback, StyleSheet, ActivityIndicator } from 'react-native'
-import { Header, Text } from 'react-native-elements'
+import { Header, Text, Button } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/Feather'
 import { useNavigation, useFocusEffect } from 'react-navigation-hooks'
 import Container from '@/components/Container'
@@ -23,6 +23,7 @@ export default () => {
   const [isLocked, setIsLocked] = useState(true)
   const [isActive, setIsActive] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isError, setIsError] = useState(false)
 
   const handlePressIn = () => {
     setIsActive(true)
@@ -30,6 +31,18 @@ export default () => {
 
   const handlePressOut = () => {
     setIsActive(false)
+  }
+
+  const fetchLockStatus = async () => {
+    setIsLoading(true)
+    const result = await lockStatus()
+    if (result.ok === true) {
+      setIsError(false)
+      setIsLocked(result.data.is_locked)
+    } else if (result.statusCode === 500) {
+      setIsError(true)
+    }
+    setIsLoading(false)
   }
 
   const handleProgressComplete = async () => {
@@ -43,15 +56,7 @@ export default () => {
   }
 
   useFocusEffect(useCallback(() => {
-    const f = async () => {
-      setIsLoading(true)
-      const result = await lockStatus()
-      if (result.ok === true) {
-        setIsLocked(result.data.is_locked)
-      }
-      setIsLoading(false)
-    }
-    f()
+    fetchLockStatus()
     return () => null
   }, []))
 
@@ -74,6 +79,14 @@ export default () => {
             size='large'
             color='#000000'
           /> :
+          isError ?
+          <>
+            <Text>箱がオフラインです</Text>
+            <Button
+              title='更新'
+              onPress={fetchLockStatus}
+            />
+          </> :
           <>
             <CircleProgressBar
               size={250}

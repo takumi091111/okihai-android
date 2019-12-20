@@ -5,7 +5,7 @@ import { Result } from '@/interfaces/Result'
 import { User } from '@/interfaces/User'
 import { Log } from '@/interfaces/Log'
 
-const API_URL = 'https://414c4238.ap.ngrok.io/api'
+const API_URL = 'https://4f5a3e71.ap.ngrok.io/api'
 
 const client = axios.create({ baseURL: API_URL })
 
@@ -129,7 +129,7 @@ export const register = async (user: User) => {
 }
 
 export const toggleLock = async () => {
-  return client.get<LockData>('/toggle')
+  return client.get<LockData>('/device/toggle')
     .then(response => {
       const { data, status } = response
       return {

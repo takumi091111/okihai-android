@@ -8,8 +8,8 @@ export default () => {
 
   useFocusEffect(useCallback(() => {
     const f = async () => {
-      Logout()
       await logout()
+      Logout()
       navigate('Splash')
     }
     f()
