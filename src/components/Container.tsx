@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react'
-import { View, StyleSheet } from 'react-native'
+import { StyleSheet, ScrollView } from 'react-native'
 
 interface Props {
   children?: ReactNode
@@ -13,7 +13,7 @@ const containerStyle = (isCenter: boolean) => StyleSheet.flatten({
 })
 
 export default ({ children, isCenter = false }: Props) => (
-  <View style={containerStyle(isCenter)}>
+  <ScrollView scrollEnabled={false} contentContainerStyle={containerStyle(isCenter)}>
     { children }
-  </View>
+  </ScrollView>
 )
