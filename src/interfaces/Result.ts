@@ -6,9 +6,6 @@ interface SuccessResult<D> {
 interface ErrorResult<DE> {
   ok: false
   data?: DE
-  error?: string | {
-    [key: string]: string[]
-  }
 }
 
 export type Result<D, DE> = {
