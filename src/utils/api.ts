@@ -4,8 +4,9 @@ import { errorHandler } from '@/utils/errorHandlers'
 import { Result } from '@/interfaces/Result'
 import { User } from '@/interfaces/User'
 import { Log } from '@/interfaces/Log'
+import { LoginData, RegisterData, LockData, ErrorData } from '@/interfaces/Data'
 
-const API_URL = 'https://4f5a3e71.ap.ngrok.io/api'
+const API_URL = 'https://9c182ee9.ap.ngrok.io/api'
 
 const client = axios.create({ baseURL: API_URL })
 
@@ -22,25 +23,6 @@ client.interceptors.response.use(
   (error: AxiosError) => Promise.reject(errorHandler(error))
 )
 
-interface LoginData {
-  token: string
-}
-
-interface RegisterData {
-  user: User,
-  token: string
-}
-
-interface LockData {
-  is_locked: boolean
-}
-
-interface PostErrorData {
-  errors?: {
-    [key: string]: string[]
-  }
-}
-
 export const login = async (
   { email, password }: Pick<User, 'email' | 'password'>,
   noticeToken?: string
@@ -53,43 +35,25 @@ export const login = async (
     data.append('notice_token', noticeToken)
   }
 
-  return client.post<LoginData>('/user/login', data)
-    .then(response => {
-      const { data, status } = response
-      return {
-        data,
-        ok: true,
-        statusCode: status
-      }
-    })
-    .catch((error: AxiosError<null>) => {
-      const { data, status } = error.response
-      return {
-        data,
-        ok: false,
-        statusCode: status
-      }
-    }) as Promise<Result<LoginData, null>>
+  const response = await client.post<LoginData>('/user/login', data)
+    .catch((error: AxiosError<null>) => error.response)
+  
+  return {
+    data: response.data,
+    ok: response.status === 200,
+    statusCode: response.status
+  } as Result<LoginData, null>
 }
 
 export const logout = async () => {
-  return client.get<null>('/user/logout')
-    .then(response => {
-      const { data, status } = response
-      return {
-        data,
-        ok: true,
-        statusCode: status
-      }
-    })
-    .catch((error: AxiosError<null>) => {
-      const { data, status } = error.response
-      return {
-        data,
-        ok: false,
-        statusCode: status
-      }
-    }) as Promise<Result<null, null>>
+  const response = await client.get<null>('/user/logout')
+    .catch((error: AxiosError<null>) => error.response)
+  
+  return {
+    data: response.data,
+    ok: response.status === 200,
+    statusCode: response.status
+  } as Result<null, null>
 }
 
 export const register = async (user: User) => {
@@ -108,84 +72,47 @@ export const register = async (user: User) => {
   if (password) data.append('password', password)
   if (device_id) data.append('device_id', device_id)
 
-  return client.post<RegisterData>('/user/register', data)
-    .then(response => {
-      const { data, status } = response
-      return {
-        data,
-        ok: true,
-        statusCode: status
-      }
-    })
-    .catch((error: AxiosError<PostErrorData>) => {
-      const { data, status } = error.response
-      return {
-        data,
-        ok: false,
-        statusCode: status,
-        error: data?.errors
-      }
-    }) as Promise<Result<RegisterData, PostErrorData>>
+  const response = await client.post<RegisterData>('/user/register', data)
+    .catch((error: AxiosError<ErrorData>) => error.response)
+  
+  return {
+    data: response.data,
+    ok: response.status === 200,
+    statusCode: response.status
+  } as Result<RegisterData, ErrorData>
 }
 
 export const toggleLock = async () => {
-  return client.get<LockData>('/device/toggle')
-    .then(response => {
-      const { data, status } = response
-      return {
-        data,
-        ok: true,
-        statusCode: status
-      }
-    })
-    .catch((error: AxiosError<null>) => {
-      const { data, status } = error.response
-      return {
-        data,
-        ok: false,
-        statusCode: status
-      }
-  }) as Promise<Result<LockData, null>>
+  const response = await client.get<LockData>('/device/toggle')
+    .catch((error: AxiosError<null>) => error.response)
+  
+  return {
+    data: response.data,
+    ok: response.status === 200,
+    statusCode: response.status
+  } as Result<LockData, null>
 }
 
 export const lockStatus = async () => {
-  return client.get<LockData>('/device/status')
-    .then(response => {
-      const { data, status } = response
-      return {
-        data,
-        ok: true,
-        statusCode: status
-      }
-    })
-    .catch((error: AxiosError<null>) => {
-      const { data, status } = error.response
-      return {
-        data,
-        ok: false,
-        statusCode: status
-      }
-    }) as Promise<Result<LockData, null>>
+  const response = await client.get<LockData>('/device/status')
+    .catch((error: AxiosError<null>) => error.response)
+  
+  return {
+    data: response.data,
+    ok: response.status === 200,
+    statusCode: response.status
+  } as Result<LockData, null>
 }
 
 export const loggedInUser = async () => {
-  return client.get<User>('/user/logged_in')
-    .then(response => {
-      const { data, status } = response
-      return {
-        data,
-        ok: true,
-        statusCode: status
-      }
-    })
-    .catch((error: AxiosError<null>) => {
-      const { data, status } = error.response
-      return {
-        data,
-        ok: false,
-        statusCode: status
-      }
-    }) as Promise<Result<User, null>>
+  const response = await client.get<User>('/user/logged_in')
+    .catch((error: AxiosError<null>) => error.response)
+  
+  return {
+    data: response.data,
+    ok: response.status === 200,
+    statusCode: response.status
+  } as Result<User, null>
 }
 
 export const updateUser = async (user: Partial<Omit<User, 'device_id'>>) => {
@@ -202,42 +129,23 @@ export const updateUser = async (user: Partial<Omit<User, 'device_id'>>) => {
   if (email) data.append('email', email)
   if (password) data.append('password', password)
 
-  return client.post<User>('/user/update', data)
-    .then(response => {
-      const { data, status } = response
-      return {
-        data,
-        ok: true,
-        statusCode: status
-      }
-    })
-    .catch((error: AxiosError<PostErrorData>) => {
-      const { data, status } = error.response
-      return {
-        data,
-        ok: false,
-        statusCode: status,
-        error: data.errors
-      }
-  }) as Promise<Result<User, PostErrorData>>
+  const response = await client.post<User>('/user/update', data)
+    .catch((error: AxiosError<ErrorData>) => error.response)
+  
+  return {
+    data: response.data,
+    ok: response.status === 200,
+    statusCode: response.status
+  } as Result<User, ErrorData>
 }
 
 export const logList = async () => {
-  return client.get<Log[]>('/log/list')
-    .then(response => {
-      const { data, status } = response
-      return {
-        data,
-        ok: true,
-        statusCode: status
-      }
-    })
-    .catch((error: AxiosError<null>) => {
-      const { data, status } = error.response
-      return {
-        data,
-        ok: false,
-        statusCode: status
-      }
-  }) as Promise<Result<Log[], null>>
+  const response = await client.get<Log[]>('/log/list')
+    .catch((error: AxiosError<null>) => error.response)
+  
+  return {
+    data: response.data,
+    ok: response.status === 200,
+    statusCode: response.status
+  } as Result<Log[], null>
 }

@@ -12,6 +12,7 @@ import { User } from '@/interfaces/User'
 import { useFormik } from 'formik'
 import { profileEditSchema } from '@/utils/validation'
 import { updateUser } from '@/utils/api'
+import { ErrorMessageString } from '@/interfaces/Data'
 
 const styles = StyleSheet.create({
   innerContainer: {
@@ -116,11 +117,12 @@ export default () => {
         setTimeout(() => Toast.hide(toast), 2000)
       } else {
         if (result.statusCode === 422) {
+          const errors = result.data.errors as ErrorMessageString
           setErrors({
-            name: result.error['name'] || '',
-            address: result.error['address'] || '',
-            email: result.error['email'] || '',
-            password: result.error['password'] || ''
+            name: errors['name'] || '',
+            address: errors['address'] || '',
+            email: errors['email'] || '',
+            password: errors['password'] || ''
           })
         }
       }

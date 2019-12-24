@@ -8,6 +8,7 @@ import { useFormik } from 'formik'
 import { registerSchema } from '@/utils/validation'
 import { Login, UpdateUser } from '@/store/events'
 import { register } from '@/utils/api'
+import { ErrorMessageString } from '@/interfaces/Data'
 
 const styles = StyleSheet.create({
   innerContainer: {
@@ -73,12 +74,13 @@ export default () => {
         navigate('AfterLogin')
       } else {
         if (result.statusCode === 422) {
+          const errors = result.data.errors as ErrorMessageString
           setErrors({
-            name: result.error['name'] || '',
-            address: result.error['address'] || '',
-            email: result.error['email'] || '',
-            password: result.error['password'] || '',
-            device_id: result.error['device_id'] || ''
+            name: errors['name'] || '',
+            address: errors['address'] || '',
+            email: errors['email'] || '',
+            password: errors['password'] || '',
+            device_id: errors['device_id'] || ''
           })
         }
       }
