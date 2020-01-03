@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { StyleSheet, ActivityIndicator } from 'react-native'
-import { Header, ListItem } from 'react-native-elements'
+import { Header, ListItem, Text } from 'react-native-elements'
 import { useNavigation, useFocusEffect } from 'react-navigation-hooks'
 import dayjs from 'dayjs'
 import 'dayjs/locale/es' 
@@ -24,6 +24,12 @@ export default () => {
   const { state, navigate } = useNavigation()
   const [logs, setLogs] = useState([] as Log[])
   const [isLoading, setIsLoading] = useState(false)
+
+  const isEmpty = useMemo(() => logs.length <= 0, [logs])
+
+  const handlePressListItem = (log: Log) => () => {
+    navigate('LogDetail', { log })
+  }
 
   useFocusEffect(useCallback(() => {
     const f = async () => {
@@ -51,12 +57,14 @@ export default () => {
           onPress: () => navigate('Logout')
         }}
       />
-      <Container isCenter={isLoading}>
+      <Container isCenter={isLoading || isEmpty}>
         { isLoading ?
           <ActivityIndicator
             size='large'
             color='#000000'
           /> :
+          isEmpty ?
+          <Text h4>ログデータが0件です</Text> :
           logs.map((log) => {
             const style = {
               ...styles.listItem,
@@ -76,7 +84,7 @@ export default () => {
                 chevron={{ color: '#8e8e93', size: 30 }}
                 containerStyle={style}
                 bottomDivider={true}
-                onPress={() => navigate('LogDetail', { log })}
+                onPress={handlePressListItem(log)}
               />
             )
           })

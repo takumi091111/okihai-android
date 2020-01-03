@@ -13,7 +13,7 @@ const containerStyle = (isCenter: boolean) => StyleSheet.flatten({
 })
 
 export default ({ children, isCenter = false }: Props) => (
-  <ScrollView scrollEnabled={false} contentContainerStyle={containerStyle(isCenter)}>
+  <ScrollView scrollEnabled={true} contentContainerStyle={containerStyle(isCenter)}>
     { children }
   </ScrollView>
 )

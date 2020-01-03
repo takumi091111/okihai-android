@@ -1,8 +1,8 @@
 import React from 'react'
-import { View, StyleSheet, KeyboardAvoidingView } from 'react-native'
+import { View, StyleSheet } from 'react-native'
 import { Header, Input, Button } from 'react-native-elements'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { useNavigation } from 'react-navigation-hooks'
-import Container from '@/components/Container'
 
 import { useFormik } from 'formik'
 import { registerSchema } from '@/utils/validation'
@@ -15,8 +15,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 400,
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 50
+    alignItems: 'center'
   },
   input: {
     paddingLeft: 15
@@ -62,7 +61,7 @@ export default () => {
       address: '',
       email: '',
       password: '',
-      device_id: '0000-0000-0000-0000'
+      device_id: ''
     },
     validationSchema: registerSchema,
     onSubmit: async (user, { setErrors }) => {
@@ -88,11 +87,7 @@ export default () => {
   })
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      contentContainerStyle={{ flex: 1 }}
-      behavior='position'
-    >
+    <>
       <Header
         centerComponent={{
           text: state.params.title
@@ -103,7 +98,13 @@ export default () => {
           onPress: () => goBack()
         }}
       />
-      <Container isCenter={true}>
+      <KeyboardAwareScrollView
+        enableOnAndroid={true}
+        contentContainerStyle={{
+          paddingTop: 70
+        }}
+        extraScrollHeight={60}
+      >
         <View style={styles.innerContainer}>
           <Input
             placeholder='名前'
@@ -182,7 +183,7 @@ export default () => {
             onPress={submitForm}
           />
         </View>
-      </Container>
-    </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
+    </>
   )
 }

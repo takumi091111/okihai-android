@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import { View, StyleSheet, KeyboardAvoidingView, ActivityIndicator } from 'react-native'
 import { Header, Input, Button } from 'react-native-elements'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { useNavigation, useFocusEffect } from 'react-navigation-hooks'
 import Toast from 'react-native-root-toast'
 import Container from '@/components/Container'
@@ -17,10 +18,9 @@ import { ErrorMessageString } from '@/interfaces/Data'
 const styles = StyleSheet.create({
   innerContainer: {
     width: '100%',
-    height: 300,
+    height: 330,
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 50
+    alignItems: 'center'
   },
   input: {
     paddingLeft: 15
@@ -130,11 +130,7 @@ export default () => {
   })
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      contentContainerStyle={{ flex: 1 }}
-      behavior='padding'
-    >
+    <>
       <Header
         centerComponent={{
           text: state.params.title
@@ -145,12 +141,20 @@ export default () => {
           onPress: () => goBack()
         }}
       />
-      <Container isCenter={true}>
-        { isLoading ? 
+      { isLoading ?
+        <Container isCenter>
           <ActivityIndicator
             size='large'
             color='#000000'
-          /> :
+          />
+        </Container> :
+        <KeyboardAwareScrollView
+          enableOnAndroid={true}
+          contentContainerStyle={{
+            paddingTop: 70
+          }}
+          extraScrollHeight={60}
+        >
           <View style={styles.innerContainer}>
             <Input
               placeholder='名前'
@@ -210,8 +214,8 @@ export default () => {
               onPress={submitForm}
             />
           </View>
-        }
-      </Container>
-    </KeyboardAvoidingView>
+        </KeyboardAwareScrollView>
+      }
+    </>
   )
 }

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { TouchableWithoutFeedback, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, TouchableWithoutFeedback, StyleSheet, ActivityIndicator } from 'react-native'
 import { Header, Text, Button } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/Feather'
 import { useNavigation, useFocusEffect } from 'react-navigation-hooks'
@@ -15,6 +15,10 @@ const styles = StyleSheet.create({
     top: -50,
     fontSize: 24,
     fontWeight: '600'
+  },
+  offlineContainer: {
+    height: 100,
+    justifyContent: 'space-between'
   }
 })
 
@@ -73,20 +77,20 @@ export default () => {
           onPress: () => navigate('Logout')
         }}
       />
-      <Container isCenter={true}>
+      <Container isCenter>
         { isLoading ?
           <ActivityIndicator
             size='large'
             color='#000000'
           /> :
           isError ?
-          <>
-            <Text>箱がオフラインです</Text>
+          <View style={styles.offlineContainer}>
+            <Text h4>箱がオフラインです</Text>
             <Button
               title='更新'
               onPress={fetchLockStatus}
             />
-          </> :
+          </View> :
           <>
             <CircleProgressBar
               size={250}

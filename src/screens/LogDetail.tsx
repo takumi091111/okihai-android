@@ -63,7 +63,7 @@ export default () => {
           onPress: () => goBack()
         }}
       />
-      <Container isCenter={true}>
+      <Container isCenter>
         <View style={styles.innerContainer}>
           <Input
             label='ログID'

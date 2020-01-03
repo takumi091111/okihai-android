@@ -6,7 +6,7 @@ import { User } from '@/interfaces/User'
 import { Log } from '@/interfaces/Log'
 import { LoginData, RegisterData, LockData, ErrorData } from '@/interfaces/Data'
 
-const API_URL = 'https://9c182ee9.ap.ngrok.io/api'
+const API_URL = 'http://bd1498ff.ap.ngrok.io/api'
 
 const client = axios.create({ baseURL: API_URL })
 

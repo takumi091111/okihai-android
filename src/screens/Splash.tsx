@@ -32,7 +32,7 @@ export default () => {
   }, []))
 
   return (
-    <Container isCenter={true}>
+    <Container isCenter>
       <Image
         source={require('@assets/logo.png')}
         style={styles.icon}

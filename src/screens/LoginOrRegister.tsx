@@ -43,7 +43,7 @@ export default () => {
   }
 
   return (
-    <Container isCenter={true}>
+    <Container isCenter>
       <View style={styles.innerContainer}>
         <Button
           title='ログイン'

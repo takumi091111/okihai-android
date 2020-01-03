@@ -56,7 +56,7 @@ export default () => {
           onPress: () => navigate('Logout')
         }}
       />
-      <Container isCenter={true}>
+      <Container isCenter>
         <View style={styles.innerContainer}>
           <Button
             title='閲覧'

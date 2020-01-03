@@ -82,7 +82,7 @@ export default () => {
           onPress: () => goBack()
         }}
       />
-      <Container isCenter={true}>
+      <Container isCenter>
         { isLoading ? 
           <ActivityIndicator
             size='large'
