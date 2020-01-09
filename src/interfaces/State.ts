@@ -1,9 +1,14 @@
-import { User } from '@/interfaces/User'
-import { ErrorDialogState } from '@interfaces/ErrorDialogState'
+export type Token = string | null
+export type NoticeToken = string | null
+export type LoggedIn<T> = T | null
 
-export interface State {
+export interface ErrorDialog {
+  title: string
+  message: string
+}
+
+export interface State<T> {
   token: string | null
-  noticeToken: string | null
-  user: User | null
-  errorDialog: ErrorDialogState
+  loggedIn: LoggedIn<T>
+  errorDialog: ErrorDialog
 }

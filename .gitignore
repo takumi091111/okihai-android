@@ -10,3 +10,6 @@ npm-debug.*
 web-build/
 web-report/
 *.lock
+
+# macOS
+.DS_Store

@@ -1,123 +1,170 @@
-import React, { useState, useCallback } from 'react'
-import { View, TouchableWithoutFeedback, StyleSheet, ActivityIndicator } from 'react-native'
-import { Header, Text, Button } from 'react-native-elements'
+import { useStore } from 'effector-react'
+import React, { useCallback, useMemo, useState } from 'react'
+import { StyleSheet } from 'react-native'
+import { Text } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/Feather'
-import { useNavigation, useFocusEffect } from 'react-navigation-hooks'
-import Container from '@/components/Container'
-import CircleProgressBar from '@/components/CircleProgressBar'
-import { toggleLock, lockStatus } from '@/utils/api'
+import {
+  useFocusEffect,
+  useNavigation,
+  useNavigationParam
+} from 'react-navigation-hooks'
+
+import Center from '@/components/Center'
+import Header from '@/components/Header'
+import Row from '@/components/Row'
+import TouchableCircleProgressBar from '@/components/TouchableCircleProgressBar'
+import { loggedInUser as store } from '@/effector/stores/loggedIn'
+import { lockStatus, toggleLock } from '@/utils/api/common'
+import { FILL_COLOR, PROGRESS_COLOR } from '@/utils/theme/colors'
+
+enum ICON_NAME {
+  LOCKED = 'lock',
+  UNLOCKED = 'unlock',
+  LOADING = 'loader',
+  ERROR = 'x'
+}
+
+enum LOCK_STATUS {
+  LOCKED = 'ロック中',
+  UNLOCKED = '解錠済み',
+  LOADING = '確認中...',
+  ERROR = '通信エラー'
+}
 
 const styles = StyleSheet.create({
-  icon: {
-    top: -180
+  container: {
+    flex: 1,
+    paddingBottom: 30
   },
-  text: {
-    top: -50,
-    fontSize: 24,
-    fontWeight: '600'
+  deviceId: {
+    alignItems: 'center'
   },
-  offlineContainer: {
-    height: 100,
-    justifyContent: 'space-between'
+  status: {
+    alignItems: 'center'
   }
 })
 
-export default () => {
-  const { state, navigate } = useNavigation()
+const Lock = () => {
+  const title: string = useNavigationParam('title')
+  const isEmployee: boolean = useNavigationParam('isEmployee')
+  const loggedInUser = useStore(store)
+  const { navigate, goBack } = useNavigation()
   const [isLocked, setIsLocked] = useState(true)
-  const [isActive, setIsActive] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isError, setIsError] = useState(false)
+  const [deviceId] = useState<string>(
+    useNavigationParam('device_id') || (loggedInUser && loggedInUser.device_id)
+  )
 
-  const handlePressIn = () => {
-    setIsActive(true)
-  }
+  const fillColor = useMemo(() => {
+    if (isLoading) return FILL_COLOR.LOADING
+    if (isError) return FILL_COLOR.ERROR
+    return isLocked ? FILL_COLOR.LOCKED : FILL_COLOR.UNLOCKED
+  }, [isLocked, isLoading])
 
-  const handlePressOut = () => {
-    setIsActive(false)
+  const iconName = useMemo(() => {
+    if (isLoading) return ICON_NAME.LOADING
+    if (isError) return ICON_NAME.ERROR
+    return isLocked ? ICON_NAME.LOCKED : ICON_NAME.UNLOCKED
+  }, [isLocked, isLoading])
+
+  const statusText = useMemo(() => {
+    if (isLoading) return LOCK_STATUS.LOADING
+    if (isError) return LOCK_STATUS.ERROR
+    return isLocked ? LOCK_STATUS.LOCKED : LOCK_STATUS.UNLOCKED
+  }, [isLocked, isLoading])
+
+  const handlePressBack = () => goBack(null)
+  const handlePressLogout = () => navigate('Logout')
+
+  const handleProgressComplete = async () => {
+    setIsError(false)
+    setIsLoading(true)
+
+    const result = await toggleLock(deviceId)
+
+    if (result.ok === false) {
+      setIsError(true)
+      if (result.statusCode === 401) {
+        navigate('Error')
+      }
+      if (result.statusCode === 404) {
+        navigate('Error')
+      }
+      if (result.statusCode === 500) {
+        navigate('Error')
+      }
+    }
+
+    const { is_locked } = result.data
+    setIsLocked(is_locked)
+    setIsLoading(false)
   }
 
   const fetchLockStatus = async () => {
+    setIsError(false)
     setIsLoading(true)
-    const result = await lockStatus()
-    if (result.ok === true) {
-      setIsError(false)
-      setIsLocked(result.data.is_locked)
-    } else if (result.statusCode === 500) {
+
+    const result = await lockStatus(deviceId)
+
+    if (result.ok === false) {
       setIsError(true)
+      if (result.statusCode === 401) {
+        navigate('Error')
+      }
+      if (result.statusCode === 404) {
+        navigate('Error')
+      }
+      if (result.statusCode === 500) {
+        navigate('Error')
+      }
     }
+
+    const { is_locked } = result.data
+    setIsLocked(is_locked)
     setIsLoading(false)
   }
 
-  const handleProgressComplete = async () => {
-    setIsActive(false)
-    setIsLoading(true)
-    const result = await toggleLock()
-    if (result.ok === true) {
-      setIsLocked(result.data.is_locked)
-    }
-    setIsLoading(false)
-  }
-
-  useFocusEffect(useCallback(() => {
-    fetchLockStatus()
-    return () => null
-  }, []))
+  useFocusEffect(
+    useCallback(() => {
+      fetchLockStatus()
+      return () => null
+    }, [])
+  )
 
   return (
     <>
       <Header
-        centerComponent={{
-          text: state.params.title
-        }}
-        rightComponent={{
-          type: 'feather',
-          icon: 'log-out',
-          color: '#ff7675',
-          onPress: () => navigate('Logout')
-        }}
+        title={title}
+        onPressBack={isEmployee ? handlePressBack : null}
+        onPressLogout={!isEmployee ? handlePressLogout : null}
       />
-      <Container isCenter>
-        { isLoading ?
-          <ActivityIndicator
-            size='large'
-            color='#000000'
-          /> :
-          isError ?
-          <View style={styles.offlineContainer}>
-            <Text h4>箱がオフラインです</Text>
-            <Button
-              title='更新'
-              onPress={fetchLockStatus}
-            />
-          </View> :
-          <>
-            <CircleProgressBar
-              size={250}
-              lineWidth={1.3}
-              backgroundColor='#ffffff'
-              progressColor='#00b894'
-              fillColor={isLocked ? '#ff7675' : '#00b894'}
-              active={isActive}
-              onProgressComplete={handleProgressComplete}
-            />
-            <TouchableWithoutFeedback
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
-            >
-              <Icon
-                size={100}
-                color='#f7f7f7'
-                name={isLocked ? 'lock' : 'unlock'}
-                style={styles.icon}
-              />
-            </TouchableWithoutFeedback>
-            <Text style={styles.text}>
-              {isLocked ? 'ロック中' : '解錠済み'}
-            </Text>
-          </>
-        }
-      </Container>
+      <Center style={styles.container}>
+        <Row style={styles.deviceId}>
+          <Text h4>{deviceId}</Text>
+        </Row>
+        <Row>
+          <TouchableCircleProgressBar
+            size={250}
+            lineWidth={1.3}
+            backgroundColor="#ffffff"
+            progressColor={PROGRESS_COLOR.LOCKED}
+            fillColor={fillColor}
+            disabled={isLoading}
+            onProgressComplete={
+              isError ? fetchLockStatus : handleProgressComplete
+            }
+            centerComponent={() => (
+              <Icon size={100} color="#f7f7f7" name={iconName} />
+            )}
+          />
+        </Row>
+        <Row style={styles.status}>
+          <Text h3>{statusText}</Text>
+        </Row>
+      </Center>
     </>
   )
 }
+
+export default Lock

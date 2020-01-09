@@ -1,12 +1,7 @@
 import { Notifications } from 'expo'
-import { getAsync, askAsync, NOTIFICATIONS } from 'expo-permissions'
-import { Result } from '@/interfaces/Result'
+import { askAsync, getAsync, NOTIFICATIONS } from 'expo-permissions'
 
-interface TokenData {
-  token: string
-}
-
-type NotificationResult = Omit<Result<TokenData, null>, 'statusCode'>
+import { NotificationResult } from '@/interfaces/Result'
 
 export const registerForPushNotification = async (): Promise<NotificationResult> => {
   // 通知へのアクセス許可を取得

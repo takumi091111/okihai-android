@@ -1,0 +1,24 @@
+export enum COLOR {
+  RED = '#ff7675',
+  DEEP_RED = '#bf4d4d',
+  BLUE = '#0984e3',
+  GREEN = '#00b894',
+  YELLOW = '#fdcb6e',
+  GRAY = '#ccc',
+  DEEP_GRAY = '#8e8e93',
+  BLACK = '#2d3436'
+}
+
+export const FILL_COLOR = {
+  LOCKED: COLOR.RED,
+  UNLOCKED: COLOR.GREEN,
+  LOADING: COLOR.GRAY,
+  ERROR: COLOR.YELLOW
+}
+
+export const PROGRESS_COLOR = {
+  LOCKED: COLOR.GREEN,
+  UNLOCKED: COLOR.RED,
+  LOADING: COLOR.GRAY,
+  ERROR: COLOR.YELLOW
+}

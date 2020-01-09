@@ -20,3 +20,11 @@ export enum VALIDATION_ERROR {
   PASSWORD_TOO_LONG = 'パスワードは255文字以下である必要があります',
   DEVICE_ID_INVALID = '置き配ボックスIDはxxxx-xxxx-xxxx-xxxxの形式である必要があります'
 }
+export enum SEARCH_ERROR {
+  RESULT_FETCH_FAILED = '検索結果の取得に失敗しました',
+  RESULT_IS_ZERO = '検索結果が0件です'
+}
+export enum NO_LOCK_ERROR {
+  SUMMARY = 'データ取得に失敗',
+  DEVICE_NOT_FOUND = '置き配ボックスが登録されていない、もしくはオフラインの可能性があります'
+}

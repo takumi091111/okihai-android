@@ -9,8 +9,9 @@
     "resolveJsonModule": true,
     "baseUrl": "./",
     "paths": {
-      "@*": ["./src/*"],
-      "@assets/*": ["./assets/*"]
+      "@/*": ["./src/*"],
+      "@assets/*": ["./assets/*"],
+      "@node_modules/*": ["./node_modules/*"]
     }
   }
 }

@@ -1,21 +1,9 @@
-import React, { useState, useEffect } from 'react'
-import { View, StyleSheet, Animated } from 'react-native'
-import { Svg, Circle } from 'react-native-svg'
 import hexToRgba from 'hex-to-rgba'
+import React, { useEffect, useState } from 'react'
+import { Animated, StyleSheet, View } from 'react-native'
+import { Circle, Svg } from 'react-native-svg'
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle)
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection:'row',
-    justifyContent:'center'
-  },
-  svg: {
-    transform: [
-      { rotate: '-90deg' }
-    ]
-  }
-})
 
 interface Props {
   size: number
@@ -27,7 +15,17 @@ interface Props {
   onProgressComplete?: () => void
 }
 
-export default (props: Props) => {
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    justifyContent: 'center'
+  },
+  svg: {
+    transform: [{ rotate: '-90deg' }]
+  }
+})
+
+const CircleProgressBar = (props: Props) => {
   const {
     size,
     lineWidth,
@@ -54,12 +52,12 @@ export default (props: Props) => {
     Animated.timing(animate, {
       toValue: 1,
       duration: 1500,
-      useNativeDriver: false
+      useNativeDriver: true
     }),
     Animated.timing(strokeAnimate, {
       toValue: 1,
       duration: 1500,
-      useNativeDriver: false
+      useNativeDriver: true
     })
   ])
 
@@ -67,19 +65,19 @@ export default (props: Props) => {
     Animated.timing(animate, {
       toValue: 0,
       duration: 300,
-      useNativeDriver: false
+      useNativeDriver: true
     }),
     Animated.timing(strokeAnimate, {
       toValue: 0,
       duration: 300,
-      useNativeDriver: false
+      useNativeDriver: true
     })
   ])
 
   const progressIn = () => {
     inAnimated.start(({ finished }) => {
       if (!finished) return
-      onProgressComplete()
+      if (onProgressComplete) onProgressComplete()
     })
   }
 
@@ -97,31 +95,29 @@ export default (props: Props) => {
 
   return (
     <View style={styles.container}>
-      <Svg
-        width={size}
-        height={size}
-        viewBox='-1 -1 34 34'
-        style={styles.svg}>
+      <Svg width={size} height={size} viewBox="-1 -1 34 34" style={styles.svg}>
         <AnimatedCircle
-          cx='16'
-          cy='16'
-          r='15.9155'
+          cx="16"
+          cy="16"
+          r="15.9155"
           fill={fillColor}
           stroke={backgroundColor}
           strokeWidth={lineWidth}
         />
         <AnimatedCircle
-          cx='16'
-          cy='16'
-          r='15.9155'
-          fill='none'
+          cx="16"
+          cy="16"
+          r="15.9155"
+          fill="none"
           stroke={stroke}
           strokeWidth={lineWidth}
-          strokeDasharray='100 100'
+          strokeDasharray="100 100"
           strokeDashoffset={offset}
-          strokeLinecap='round'
+          strokeLinecap="round"
         />
       </Svg>
     </View>
   )
 }
+
+export default CircleProgressBar
