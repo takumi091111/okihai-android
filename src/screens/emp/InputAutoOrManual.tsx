@@ -45,9 +45,13 @@ const InputAutoOrManual = () => {
     return true
   }
 
-  const delayedSetIsLoading = async (value: boolean, timeout: number) => {
-    setTimeout(setIsLoading(value), timeout)
-  }
+  const sleep = async (seconds: number) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve()
+      }, seconds * 1000)
+    })
+  } 
 
   const handlePressLogout = () => navigate('Logout')
 
@@ -62,7 +66,9 @@ const InputAutoOrManual = () => {
     setIsLoading(true)
     const lockExists = await fetchLockStatus(data)
     // 1.5秒遅らせることで、何度も処理してしまうのを防ぐ
-    delayedSetIsLoading(false, 1500)
+    setIsLoading(false)
+    await sleep(1.5)
+    setIsLoading(false)
     if (!lockExists) return
 
     navigate('Lock', data)
