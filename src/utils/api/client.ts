@@ -4,7 +4,7 @@ import { AsyncStorage } from 'react-native'
 import { Result } from '@/interfaces/Result'
 import { errorHandler } from '@/utils/errorHandler'
 
-const API_URL = 'https://9ee1067d.ap.ngrok.io/api'
+const API_URL = 'https://f082166e.ap.ngrok.io/api'
 
 export const createClient = (basePath?: string) => {
   let client: AxiosInstance
@@ -25,12 +25,18 @@ export const createClient = (basePath?: string) => {
     request.headers = {
       Authorization: token ? `Bearer ${token}` : ''
     }
+    console.log(request.url)
+    console.log({ params: request.params, data: request.data })
     return request
   })
 
   client.interceptors.response.use(
     response => response,
-    (error: AxiosError) => Promise.reject(errorHandler(error))
+    (error: AxiosError) => {
+      const response = error.response
+      console.log(response.status, response.data)
+      return Promise.reject(errorHandler(error))
+    }
   )
 
   return client
