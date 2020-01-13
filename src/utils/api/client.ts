@@ -3,20 +3,23 @@ import { AsyncStorage } from 'react-native'
 
 import { Result } from '@/interfaces/Result'
 import { errorHandler } from '@/utils/errorHandler'
+import { getApiUrl } from '@/utils/api/gist'
 
-const API_URL = 'https://f082166e.ap.ngrok.io/api'
+getApiUrl()
 
 export const createClient = (basePath?: string) => {
-  let client: AxiosInstance
-
-  if (!basePath) {
-    client = axios.create({ baseURL: `${API_URL}` })
-  } else {
-    const joinedUrl = [API_URL, basePath].join('/')
-    client = axios.create({ baseURL: joinedUrl })
-  }
+  const client = axios.create()
 
   client.interceptors.request.use(async request => {
+    const API_URL = await getApiUrl()
+
+    if (!basePath) { 
+      request.baseURL = API_URL
+    } else {
+      const joinedUrl = [API_URL, basePath].join('/')
+      request.baseURL = joinedUrl
+    }
+
     // ログイン時はトークンを付けない
     const isLogin = /login$/.test(request.url)
     if (isLogin) return request
