@@ -50,7 +50,7 @@ const Lock = () => {
   const loggedInUser = useStore(store)
   const { navigate, goBack } = useNavigation()
   const [isLocked, setIsLocked] = useState(true)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
   const [deviceId] = useState<string>(
     useNavigationParam('device_id') || (loggedInUser && loggedInUser.device_id)
@@ -77,30 +77,6 @@ const Lock = () => {
   const handlePressBack = () => goBack(null)
   const handlePressLogout = () => navigate('Logout')
 
-  const handleProgressComplete = async () => {
-    setIsError(false)
-    setIsLoading(true)
-
-    const result = await toggleLock(deviceId)
-
-    if (result.ok === false) {
-      setIsError(true)
-      if (result.statusCode === 401) {
-        navigate('Error')
-      }
-      if (result.statusCode === 404) {
-        navigate('Error')
-      }
-      if (result.statusCode === 500) {
-        navigate('Error')
-      }
-    }
-
-    const { is_locked } = result.data
-    setIsLocked(is_locked)
-    setIsLoading(false)
-  }
-
   const fetchLockStatus = async () => {
     setIsError(false)
     setIsLoading(true)
@@ -125,8 +101,33 @@ const Lock = () => {
     setIsLoading(false)
   }
 
+  const handleProgressComplete = async () => {
+    setIsError(false)
+    setIsLoading(true)
+
+    const result = await toggleLock(deviceId)
+
+    if (result.ok === false) {
+      setIsError(true)
+      if (result.statusCode === 401) {
+        navigate('Error')
+      }
+      if (result.statusCode === 404) {
+        navigate('Error')
+      }
+      if (result.statusCode === 500) {
+        navigate('Error')
+      }
+    }
+
+    const { is_locked } = result.data
+    setIsLocked(is_locked)
+    setIsLoading(false)
+  }
+
   useFocusEffect(
     useCallback(() => {
+      if (isError || isLoading) return () => null
       fetchLockStatus()
       return () => null
     }, [])
