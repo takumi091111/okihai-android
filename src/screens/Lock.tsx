@@ -80,7 +80,7 @@ const Lock = () => {
   const handlePressLogout = () => navigate('Logout')
 
   const fetchLockStatus = async () => {
-    if (isFirst && initialLockState !== null) {
+    if (isFirst && initialLockState !== undefined) {
       setIsLocked(initialLockState)
       return
     }
