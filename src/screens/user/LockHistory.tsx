@@ -22,6 +22,7 @@ const LockHistory = () => {
   const [isError, setIsError] = useState(false)
   const [isRefresh, setIsRefresh] = useState(false)
   const isEmpty = useMemo(() => logs.length <= 0, [logs])
+  const reversedLogs = useMemo(() => logs.reverse(), [logs])
 
   const scrollViewStyle = useMemo(() => {
     if (isLoading || isError || isEmpty) {
@@ -84,7 +85,7 @@ const LockHistory = () => {
         ) : isEmpty ? (
           <Empty active={isEmpty} text="開閉履歴が0件です" />
         ) : (
-          logs.map(log => (
+          reversedLogs.map(log => (
             <LockHistoryListItem
               key={log.id}
               log={log}
