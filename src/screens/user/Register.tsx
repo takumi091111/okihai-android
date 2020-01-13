@@ -25,7 +25,6 @@ const Register = () => {
     inputValues: RegisterInput<User>,
     setErrors: (errors: any) => void
   ) => {
-    // TODO: ここでnoticeTokenが使えるかどうか調べる -> ダメっぽいので実装待ち
     const result = await register({ ...inputValues, noticeToken })
 
     if (result.ok === false) {
