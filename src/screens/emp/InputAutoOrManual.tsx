@@ -46,12 +46,12 @@ const InputAutoOrManual = () => {
   }
 
   const sleep = async (seconds: number) => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         resolve()
       }, seconds * 1000)
     })
-  } 
+  }
 
   const handlePressLogout = () => navigate('Logout')
 

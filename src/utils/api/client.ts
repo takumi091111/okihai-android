@@ -2,8 +2,8 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios'
 import { AsyncStorage } from 'react-native'
 
 import { Result } from '@/interfaces/Result'
-import { errorHandler } from '@/utils/errorHandler'
 import { getApiUrl } from '@/utils/api/gist'
+import { errorHandler } from '@/utils/errorHandler'
 
 getApiUrl()
 
@@ -13,7 +13,7 @@ export const createClient = (basePath?: string) => {
   client.interceptors.request.use(async request => {
     const API_URL = await getApiUrl()
 
-    if (!basePath) { 
+    if (!basePath) {
       request.baseURL = API_URL
     } else {
       const joinedUrl = [API_URL, basePath].join('/')

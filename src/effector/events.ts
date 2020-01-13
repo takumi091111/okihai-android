@@ -16,7 +16,7 @@ export const ToggleErrorDialog = createEvent('ToggleErrorDialog')
 
 Login.watch(() => console.log('Login'))
 Logout.watch(() => console.log('Logout'))
-UpdateNoticeToken.watch((token) => console.log('UpdateNoticeToken', token))
+UpdateNoticeToken.watch(token => console.log('UpdateNoticeToken', token))
 UpdateUser.watch(() => console.log('UpdateUser'))
 UpdateEmployee.watch(() => console.log('UpdateEmployee'))
 UpdateErrorDialog.watch(() => console.log('UpdateErrorDialog'))
