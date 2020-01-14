@@ -51,7 +51,7 @@ const showValidationError = (
 
 const showLockNotFoundError = (error: AxiosError<any>): AxiosError<any> => {
   // QR読取画面、手動入力画面、ロック画面以外ではエラーを表示させない
-  const isLockStatus = /status$/.test(error.config.url)
+  const isLockStatus = /(toggle|status)$/.test(error.config.url)
   if (!isLockStatus) return error
 
   UpdateErrorDialog({
