@@ -14,17 +14,18 @@ const InputManual = () => {
     const result = await lockStatus(device_id)
     if (result.ok === false) {
       navigate('Error')
-      return false
+      return null
     }
-    return true
+    return result
   }
 
   const handlePressBack = () => goBack()
 
   const handleSubmit = async ({ device_id }: InputValue) => {
-    const lockExists = await fetchLockStatus({ device_id })
-    if (!lockExists) return
-    navigate('Lock', { device_id })
+    const result = await fetchLockStatus({ device_id })
+    if (!result) return
+    const { is_locked } = result.data
+    navigate('Lock', { device_id, is_locked })
   }
 
   return (

@@ -47,8 +47,10 @@ const styles = StyleSheet.create({
 const Lock = () => {
   const title: string = useNavigationParam('title')
   const isEmployee: boolean = useNavigationParam('isEmployee')
+  const initialLockState: boolean = useNavigationParam('is_locked')
   const loggedInUser = useStore(store)
   const { navigate, goBack } = useNavigation()
+  const [isFirst, setIsFirst] = useState(true)
   const [isLocked, setIsLocked] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
@@ -78,6 +80,11 @@ const Lock = () => {
   const handlePressLogout = () => navigate('Logout')
 
   const fetchLockStatus = async () => {
+    if (isFirst && initialLockState !== null) {
+      setIsLocked(initialLockState)
+      return
+    }
+
     setIsError(false)
     setIsLoading(true)
 
@@ -99,6 +106,7 @@ const Lock = () => {
     const { is_locked } = result.data
     setIsLocked(is_locked)
     setIsLoading(false)
+    setIsFirst(false)
   }
 
   const handleProgressComplete = async () => {

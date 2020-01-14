@@ -40,9 +40,9 @@ const InputAutoOrManual = () => {
     const result = await lockStatus(device_id)
     if (result.ok === false) {
       navigate('Error')
-      return false
+      return null
     }
-    return true
+    return result
   }
 
   const sleep = async (seconds: number) => {
@@ -64,14 +64,16 @@ const InputAutoOrManual = () => {
     if (!isValidQRCode(data)) return
 
     setIsLoading(true)
-    const lockExists = await fetchLockStatus(data)
+    const result = await fetchLockStatus(data)
     // 1.5秒遅らせることで、何度も処理してしまうのを防ぐ
-    setIsLoading(false)
     await sleep(1.5)
     setIsLoading(false)
-    if (!lockExists) return
+    if (!result) return
 
-    navigate('Lock', data)
+    const { device_id } = data
+    const { is_locked } = result.data
+
+    navigate('Lock', { device_id, is_locked })
   }
 
   return (
