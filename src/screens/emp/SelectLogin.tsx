@@ -1,6 +1,6 @@
 import React from 'react'
 import { Image, StyleSheet } from 'react-native'
-import { Button } from 'react-native-elements'
+import { Button, Text } from 'react-native-elements'
 import { useNavigation } from 'react-navigation-hooks'
 
 import Center from '@/components/Center'
@@ -11,6 +11,10 @@ const styles = StyleSheet.create({
     width: 250,
     height: 250,
     marginBottom: 40
+  },
+  empLabel: {
+    alignItems: 'center',
+    paddingTop: 30
   }
 })
 
@@ -24,6 +28,9 @@ const SelectLoginOrRegister = () => {
       <Image source={require('@assets/logo.png')} style={styles.image} />
       <Row>
         <Button title="ログイン" onPress={handlePressLogin} />
+      </Row>
+      <Row style={styles.empLabel}>
+        <Text h3>従業員用</Text>
       </Row>
     </Center>
   )
