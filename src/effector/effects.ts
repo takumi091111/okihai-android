@@ -1,5 +1,6 @@
 import { createEffect } from 'effector'
 import { AsyncStorage } from 'react-native'
+
 import { registerForPushNotification } from '@/utils/notification'
 
 export const fetchNoticeToken = createEffect({
