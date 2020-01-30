@@ -32,6 +32,15 @@ const InputAutoOrManual = () => {
   const { hasPermission, askPermission } = usePermission('camera')
   const [isLoading, setIsLoading] = useState(false)
 
+  const isValidJSON = (string: string) => {
+    try {
+      JSON.parse(string)
+    } catch(error) {
+      return false
+    }
+    return true
+  }
+
   const isValidQRCode = (args: any): args is QRCodeData => {
     return manualInputSchema.isValidSync(args)
   }
@@ -59,10 +68,11 @@ const InputAutoOrManual = () => {
 
   const handleScanned = async (params: BarCodeEvent) => {
     if (isLoading) return
+    if (!isValidJSON(params.data)) return
 
     const data = JSON.parse(params.data)
     if (!isValidQRCode(data)) return
-
+    
     setIsLoading(true)
     const result = await fetchLockStatus(data)
     // 1.5秒遅らせることで、何度も処理してしまうのを防ぐ
