@@ -83,7 +83,7 @@ const InputAutoOrManual = () => {
           <Header title={title} onPressLogout={handlePressLogout} />
           {hasPermission ? (
             <View style={styles.container}>
-              <QRCodeScanner onScanned={handleScanned} />
+              <QRCodeScanner isLoading={isLoading} onScanned={handleScanned} />
             </View>
           ) : (
             <NoPermission
