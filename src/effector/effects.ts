@@ -6,6 +6,7 @@ import { registerForPushNotification } from '@/utils/notification'
 export const fetchNoticeToken = createEffect({
   handler: async () => {
     const result = await registerForPushNotification()
+    console.log({ noticeToken: result.data.token })
     if (result.ok === true) {
       return result.data.token
     } else {
