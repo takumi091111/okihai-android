@@ -41,6 +41,11 @@ const styles = StyleSheet.create({
   },
   status: {
     alignItems: 'center'
+  },
+  refresh: {
+    position: 'absolute',
+    left: '87.5%',
+    bottom: 5
   }
 })
 
@@ -170,6 +175,14 @@ const Lock = () => {
         </Row>
         <Row style={styles.status}>
           <Text h3>{statusText}</Text>
+        </Row>
+        <Row style={styles.refresh}>
+          <Icon
+            size={25}
+            color="#8e8e93"
+            name="refresh-cw"
+            onPress={fetchLockStatus}
+          />
         </Row>
       </Center>
     </>
