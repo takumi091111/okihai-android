@@ -35,7 +35,7 @@ const InputAutoOrManual = () => {
   const isValidJSON = (string: string) => {
     try {
       JSON.parse(string)
-    } catch(error) {
+    } catch (error) {
       return false
     }
     return true
@@ -72,7 +72,7 @@ const InputAutoOrManual = () => {
 
     const data = JSON.parse(params.data)
     if (!isValidQRCode(data)) return
-    
+
     setIsLoading(true)
     const result = await fetchLockStatus(data)
     // 1.5秒遅らせることで、何度も処理してしまうのを防ぐ
